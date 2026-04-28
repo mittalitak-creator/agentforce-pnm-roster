@@ -102,7 +102,7 @@ public with sharing class RosterContextAction {
     public class Input {
         @InvocableVariable(
             label='CRF Record ID'
-            description='The Salesforce record ID of the Case Related File. Passed automatically by the Agentforce framework from the current page context.'
+            description='The CRF record ID or record name (e.g. CRF-000000001 or 1FxIf000000blRZKAY). Extract from what the user provides in their message.'
             required=true
         )
         public String crfRecordId;

@@ -618,7 +618,7 @@ public with sharing class RosterValidationAction {
 
     public class Input {
         @InvocableVariable(label='CRF Record ID' required=true
-            description='Salesforce record ID of the Case Related File. The action reads the attached CSV file directly.')
+            description='The CRF record ID or record name (e.g. CRF-000000001 or 1FxIf000000blRZKAY). Extract from what the user provides.')
         public String crfId;
         @InvocableVariable(label='Known Column Names (from DPE mapping)') public List<String> knownColumns;
     }

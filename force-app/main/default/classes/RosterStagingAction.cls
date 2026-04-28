@@ -174,7 +174,9 @@ public with sharing class RosterStagingAction {
     }
 
     public class Input {
-        @InvocableVariable(label='CRF Record ID' required=true) public String crfId;
+        @InvocableVariable(label='CRF Record ID' required=true
+            description='The CRF record ID or record name (e.g. CRF-000000001 or 1FxIf000000blRZKAY). Extract from what the user provides.')
+        public String crfId;
         @InvocableVariable(
             label='Validated Rows JSON'
             description='JSON array of row maps from RosterValidationAction — only valid (non-skipped) rows.'
