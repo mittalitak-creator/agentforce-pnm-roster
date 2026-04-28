@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiFunction xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Two modes: TRIGGER triggers DPE Gen AI field mapping and returns a deep link to the mapping review screen. POLL checks whether the admin has manually set the CRF mapping status to Completed — required before ingestion can be triggered.</description>
+    <developerName>ManageRosterFieldMapping</developerName>
+    <invocationTarget>RosterMappingAction</invocationTarget>
+    <invocationTargetType>apex</invocationTargetType>
+    <isConfirmationRequired>false</isConfirmationRequired>
+    <isIncludeInProgressIndicator>true</isIncludeInProgressIndicator>
+    <masterLabel>Manage Roster Field Mapping</masterLabel>
+    <progressIndicatorMessage>Managing field mapping...</progressIndicatorMessage>
+</GenAiFunction>

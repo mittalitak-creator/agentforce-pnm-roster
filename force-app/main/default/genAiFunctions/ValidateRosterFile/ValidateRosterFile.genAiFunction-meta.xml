@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiFunction xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Validates the attached roster CSV file against all 35+ rules (file-level, column, row, cross-field, size, lookup). Returns a pass/fail summary with row-level error details and an agentNarration paragraph. Run before staging.</description>
+    <developerName>ValidateRosterFile</developerName>
+    <invocationTarget>RosterValidationAction</invocationTarget>
+    <invocationTargetType>apex</invocationTargetType>
+    <isConfirmationRequired>false</isConfirmationRequired>
+    <isIncludeInProgressIndicator>true</isIncludeInProgressIndicator>
+    <masterLabel>Validate Roster File</masterLabel>
+    <progressIndicatorMessage>Validating roster file...</progressIndicatorMessage>
+</GenAiFunction>
