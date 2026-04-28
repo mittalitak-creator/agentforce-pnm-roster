@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GenAiPlugin xmlns="http://soap.sforce.com/2006/04/metadata">
     <canEscalate>false</canEscalate>
-    <description>Manages provider network roster file ingestion. Handles any request to upload, validate, stage, map fields for, or ingest a provider roster file. Also handles requests to check ingestion status or view ingestion results.</description>
+    <description>Manages provider network roster file ingestion. Handles any request to validate, stage, map fields for, or ingest a provider roster CSV file attached to a Case Related File record. Also handles requests to check ingestion status or view ingestion results.</description>
     <developerName>ProviderRosterManagement</developerName>
     <genAiFunctions>
         <functionName>GetRosterCRFContext</functionName>
@@ -19,7 +19,7 @@
         <functionName>TriggerRosterIngestion</functionName>
     </genAiFunctions>
     <genAiPluginInstructions>
-        <description>When the user asks to upload, validate, stage, or ingest a roster file: first call GetRosterCRFContext with the CRF record ID from page context. If no currentRecordId is available, ask the user to provide the CRF record ID. Do not ask the user to upload or paste any file — the system reads attached files automatically.</description>
+        <description>When the user asks to process, validate, stage, or ingest a roster file: call GetRosterCRFContext with the CRF record ID from page context. If no currentRecordId is available, ask the user to provide the CRF record ID. The file is already attached to the CRF record — you do not need to receive or transfer any file from the user.</description>
         <developerName>instruction_start0</developerName>
         <language>en_US</language>
         <masterLabel>instruction_start0</masterLabel>
@@ -33,7 +33,7 @@
         <sortOrder>1</sortOrder>
     </genAiPluginInstructions>
     <genAiPluginInstructions>
-        <description>To validate: call ValidateRosterFile with crfId only. The action reads the attached file itself — never ask the user for file contents. After validation narrate the results. Pass the validatedRowsJson output directly to StageRosterFile without modifying it. Always confirm with the admin before triggering staging, mapping, or ingestion.</description>
+        <description>To validate: call ValidateRosterFile with the crfId. The action reads the file from the CRF record automatically — you never need to ask the user for file contents. After validation narrate the results. Pass the validatedRowsJson output directly to StageRosterFile without modifying it. Always confirm with the admin before triggering staging, mapping, or ingestion.</description>
         <developerName>instruction_validate2</developerName>
         <language>en_US</language>
         <masterLabel>instruction_validate2</masterLabel>
@@ -49,5 +49,5 @@
     <language>en_US</language>
     <masterLabel>Provider Roster Management</masterLabel>
     <pluginType>Topic</pluginType>
-    <scope>Handle all requests related to provider roster file ingestion: uploading a roster, validating a roster file, staging, field mapping, running ingestion, and checking ingestion status or results. If the user mentions a roster file, a CRF record, or provider network data loading, this topic applies.</scope>
+    <scope>Handle all requests related to provider roster file ingestion: processing a roster file, validating, staging, field mapping, running ingestion, and checking ingestion status or results. Triggered when the user mentions a roster file, a CRF record, or provider network data loading. The roster file is already attached to the CRF record in Salesforce — no file transfer from the user is needed.</scope>
 </GenAiPlugin>
