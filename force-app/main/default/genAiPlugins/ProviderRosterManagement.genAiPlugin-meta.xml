@@ -4,7 +4,7 @@
     <description>Manages provider network roster file ingestion. Handles any request to validate, stage, map fields for, or ingest a provider roster CSV file attached to a Case Related File record. Also handles requests to check ingestion status or view ingestion results.</description>
     <developerName>ProviderRosterManagement</developerName>
     <genAiFunctions>
-        <functionName>GetRosterCRFContext</functionName>
+        <functionName>EmployeeCopilot__GetRecordDetails</functionName>
     </genAiFunctions>
     <genAiFunctions>
         <functionName>ValidateRosterFile</functionName>
@@ -19,31 +19,31 @@
         <functionName>TriggerRosterIngestion</functionName>
     </genAiFunctions>
     <genAiPluginInstructions>
-        <description>When the user asks to process, validate, stage, or ingest a roster file: call GetRosterCRFContext with whatever CRF identifier the user provides — it can be a record name like CRF-000000001 or a Salesforce ID. If the action returns an error, relay the exact errorMessage to the user. The file is already attached to the CRF record — you do not need to receive or transfer any file from the user.</description>
-        <developerName>instruction_start0</developerName>
+        <description>When the user asks to process, validate, stage, or ingest a roster file: call GetRecordDetails with the CRF record ID the user provides (e.g. CRF-000000001 or 1FxIf000000blRZKAY) to retrieve the CRF record. The object type is CaseRelatedFile. From the result, read ProcessStage and ProcessStatus to determine the workflow step, and confirm the record exists before proceeding.</description>
+        <developerName>instruction_get_context0</developerName>
         <language>en_US</language>
-        <masterLabel>instruction_start0</masterLabel>
+        <masterLabel>instruction_get_context0</masterLabel>
         <sortOrder>0</sortOrder>
     </genAiPluginInstructions>
     <genAiPluginInstructions>
-        <description>After GetRosterCRFContext returns, use agentResumeInstruction to decide next step. FRESH: call ValidateRosterFile with the crfId, then StageRosterFile. STAGED: go to DPE mapping. MAPPING_IN_REVIEW: ask admin to set CRF mapping status to Completed. MAPPING_COMPLETE: offer to trigger ingestion. INGESTION_RUNNING: tell admin the job is running. INGESTION_COMPLETE: show summary.</description>
+        <description>After GetRecordDetails returns the CRF record, determine the next step from ProcessStage and ProcessStatus: if both are blank or null = FRESH (validate then stage); if ProcessStage = Staging and ProcessStatus = Complete = STAGED (go to mapping); if ProcessStage = Mapping and ProcessStatus = InReview = ask admin to set status to Completed; if ProcessStage = Mapping and ProcessStatus = Complete = trigger ingestion; if ProcessStage = Processing and ProcessStatus = InProgress = tell admin job is running.</description>
         <developerName>instruction_routing1</developerName>
         <language>en_US</language>
         <masterLabel>instruction_routing1</masterLabel>
         <sortOrder>1</sortOrder>
     </genAiPluginInstructions>
     <genAiPluginInstructions>
-        <description>To validate: call ValidateRosterFile with the crfId. The action reads the file from the CRF record automatically — you never need to ask the user for file contents. After validation narrate the results. Pass the validatedRowsJson output directly to StageRosterFile without modifying it. Always confirm with the admin before triggering staging, mapping, or ingestion.</description>
-        <developerName>instruction_validate2</developerName>
+        <description>For FRESH state: call ValidateRosterFile passing the CRF record Id from GetRecordDetails as crfId. The action reads the attached CSV file automatically — never ask the user for file contents. Narrate validation results. Pass the validatedRowsJson output directly to StageRosterFile along with the same crfId. Always confirm with the admin before staging, mapping, or ingesting.</description>
+        <developerName>instruction_validate_stage2</developerName>
         <language>en_US</language>
-        <masterLabel>instruction_validate2</masterLabel>
+        <masterLabel>instruction_validate_stage2</masterLabel>
         <sortOrder>2</sortOrder>
     </genAiPluginInstructions>
     <genAiPluginInstructions>
-        <description>After DPE mapping is triggered, give the admin a direct link to the CRF record to review and complete the mapping. Poll using ManageRosterFieldMapping in POLL mode. Do not trigger ingestion until mappingComplete = true. When ingestion is triggered, tell the admin they can close the chat and will be notified when the job finishes. Do not mention time estimates.</description>
-        <developerName>instruction_mapping3</developerName>
+        <description>After DPE mapping is triggered via ManageRosterFieldMapping in TRIGGER mode, give the admin a link to the CRF record to complete the mapping review. Poll in POLL mode until mappingComplete = true. Do not trigger ingestion until then. When ingestion is triggered via TriggerRosterIngestion, tell the admin they can close the chat and will be notified when the job finishes. Do not mention time estimates.</description>
+        <developerName>instruction_mapping_ingest3</developerName>
         <language>en_US</language>
-        <masterLabel>instruction_mapping3</masterLabel>
+        <masterLabel>instruction_mapping_ingest3</masterLabel>
         <sortOrder>3</sortOrder>
     </genAiPluginInstructions>
     <language>en_US</language>
