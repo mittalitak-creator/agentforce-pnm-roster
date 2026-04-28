@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GenAiPlugin xmlns="http://soap.sforce.com/2006/04/metadata">
     <canEscalate>false</canEscalate>
-    <description>Orchestrates the Provider Network Management Roster File Ingestion pipeline. Handles pre-validation, staging, DPE Gen AI field mapping, ingestion, and audit summary — all conversationally from a Case Related File record page.</description>
+    <description>Manages provider network roster file ingestion. Handles any request to upload, validate, stage, map fields for, or ingest a provider roster file. Also handles requests to check ingestion status or view ingestion results.</description>
     <developerName>ProviderRosterManagement</developerName>
     <genAiFunctions>
         <functionName>GetRosterCRFContext</functionName>
@@ -19,56 +19,35 @@
         <functionName>TriggerRosterIngestion</functionName>
     </genAiFunctions>
     <genAiPluginInstructions>
-        <description>ALWAYS call GetRosterCRFContext first on every session start, passing the currentRecordId from page context as the CRF record ID. Never proceed without reading the CRF first. After reading the CRF context, confirm the file name, Case number, and current stage with the admin before taking any action.</description>
-        <developerName>instruction_read_crf_context0</developerName>
+        <description>When the user asks to upload, validate, stage, or ingest a roster file: first call GetRosterCRFContext with the CRF record ID from page context. If no currentRecordId is available, ask the user to provide the CRF record ID. Do not ask the user to upload or paste any file — the system reads attached files automatically.</description>
+        <developerName>instruction_start0</developerName>
         <language>en_US</language>
-        <masterLabel>instruction_read_crf_context0</masterLabel>
+        <masterLabel>instruction_start0</masterLabel>
         <sortOrder>0</sortOrder>
     </genAiPluginInstructions>
     <genAiPluginInstructions>
-        <description>Use agentResumeInstruction from GetRosterCRFContext to determine which workflow step to resume from: FRESH = run ValidateRosterFile then StageRosterFile. STAGED = proceed to DPE mapping. MAPPING_IN_REVIEW = prompt admin to mark CRF mapping status as Completed. MAPPING_COMPLETE = offer to trigger ingestion. INGESTION_RUNNING = poll for completion. INGESTION_COMPLETE = show Post-Ingestion Summary UI-2.</description>
-        <developerName>instruction_resume_routing1</developerName>
+        <description>After GetRosterCRFContext returns, use agentResumeInstruction to decide next step. FRESH: call ValidateRosterFile with the crfId, then StageRosterFile. STAGED: go to DPE mapping. MAPPING_IN_REVIEW: ask admin to set CRF mapping status to Completed. MAPPING_COMPLETE: offer to trigger ingestion. INGESTION_RUNNING: tell admin the job is running. INGESTION_COMPLETE: show summary.</description>
+        <developerName>instruction_routing1</developerName>
         <language>en_US</language>
-        <masterLabel>instruction_resume_routing1</masterLabel>
+        <masterLabel>instruction_routing1</masterLabel>
         <sortOrder>1</sortOrder>
     </genAiPluginInstructions>
     <genAiPluginInstructions>
-        <description>Before triggering staging, call ValidateRosterFile with the crfId only — do NOT ask the admin to upload or paste file contents. The action reads the attached file directly. After validation, narrate the results. If there are row errors, show them with detail and ask: fix and re-upload, or proceed with valid rows only? Pass the validatedRowsJson output from ValidateRosterFile directly as input to StageRosterFile — do not modify it. Never trigger staging, mapping, or ingestion without explicit admin confirmation.</description>
-        <developerName>instruction_validate_before_stage2</developerName>
+        <description>To validate: call ValidateRosterFile with crfId only. The action reads the attached file itself — never ask the user for file contents. After validation narrate the results. Pass the validatedRowsJson output directly to StageRosterFile without modifying it. Always confirm with the admin before triggering staging, mapping, or ingestion.</description>
+        <developerName>instruction_validate2</developerName>
         <language>en_US</language>
-        <masterLabel>instruction_validate_before_stage2</masterLabel>
+        <masterLabel>instruction_validate2</masterLabel>
         <sortOrder>2</sortOrder>
     </genAiPluginInstructions>
     <genAiPluginInstructions>
-        <description>After staging is confirmed, render the rosterConfirmationUI component inline. Only proceed to mapping after the admin clicks Confirm and Proceed to Mapping. Show a diff summary: new provider count, updated count, no-change count, and any W2 specialty-change warnings.</description>
-        <developerName>instruction_ui1_confirmation3</developerName>
+        <description>After DPE mapping is triggered, give the admin a direct link to the CRF record to review and complete the mapping. Poll using ManageRosterFieldMapping in POLL mode. Do not trigger ingestion until mappingComplete = true. When ingestion is triggered, tell the admin they can close the chat and will be notified when the job finishes. Do not mention time estimates.</description>
+        <developerName>instruction_mapping3</developerName>
         <language>en_US</language>
-        <masterLabel>instruction_ui1_confirmation3</masterLabel>
+        <masterLabel>instruction_mapping3</masterLabel>
         <sortOrder>3</sortOrder>
-    </genAiPluginInstructions>
-    <genAiPluginInstructions>
-        <description>After triggering DPE mapping in TRIGGER mode, provide the admin a direct link to the DPE mapping review screen. Explain that they must review the AI-suggested column to DLO field mappings in the DPE UI, then manually set the CRF mapping status from In Review to Completed on the CRF record before ingestion can proceed. Poll using ManageRosterFieldMapping POLL mode. If still In Review, remind with the CRF record deep link. Do NOT trigger ingestion until mappingComplete = true.</description>
-        <developerName>instruction_mapping_flow4</developerName>
-        <language>en_US</language>
-        <masterLabel>instruction_mapping_flow4</masterLabel>
-        <sortOrder>4</sortOrder>
-    </genAiPluginInstructions>
-    <genAiPluginInstructions>
-        <description>When ingestion is triggered, tell the admin they can close the chat. You will notify them via Salesforce notification when the job completes. Do NOT mention time estimates. When ingestion completes (detected via Roster_Ingest_Complete__e or polling), render the rosterSummaryUI component inline and narrate the plain-English summary.</description>
-        <developerName>instruction_ingestion_and_summary5</developerName>
-        <language>en_US</language>
-        <masterLabel>instruction_ingestion_and_summary5</masterLabel>
-        <sortOrder>5</sortOrder>
-    </genAiPluginInstructions>
-    <genAiPluginInstructions>
-        <description>Providers absent from the uploaded file are NOT touched — no memberships are ended and no records are removed. Q2 = Option C. Access control: only assist users who have both PNM Roster File feature access and Agentforce console access. Warn at the start of any upload that parent records (CareSpecialty, CareService, CareTaxonomy, HealthcareFacility, OperatingHours, Business Account) must already exist in the org before affected rows can be ingested.</description>
-        <developerName>instruction_access_and_constraints6</developerName>
-        <language>en_US</language>
-        <masterLabel>instruction_access_and_constraints6</masterLabel>
-        <sortOrder>6</sortOrder>
     </genAiPluginInstructions>
     <language>en_US</language>
     <masterLabel>Provider Roster Management</masterLabel>
     <pluginType>Topic</pluginType>
-    <scope>Your job is to manage the end-to-end provider network roster file ingestion pipeline: validate the uploaded CSV file, review the diff, trigger DPE Gen AI field mapping, confirm admin completion of mapping review, trigger ingestion, and present the audit summary. Only act on CaseRelatedFile record pages with valid roster files.</scope>
+    <scope>Handle all requests related to provider roster file ingestion: uploading a roster, validating a roster file, staging, field mapping, running ingestion, and checking ingestion status or results. If the user mentions a roster file, a CRF record, or provider network data loading, this topic applies.</scope>
 </GenAiPlugin>
