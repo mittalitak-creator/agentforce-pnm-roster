@@ -57,12 +57,16 @@ public with sharing class RosterValidationAction {
         Long fileSizeBytes = 0;
 
         try {
+            String crfRef = inp.crfId;
+            String crfWhere = (crfRef.length() == 15 || crfRef.length() == 18)
+                ? 'WHERE Id = :crfRef'
+                : 'WHERE Name = :crfRef';
             List<SObject> crfList = Database.query(
-                'SELECT ContentDocumentId__c FROM CaseRelatedFile WHERE Id = :inp.crfId WITH USER_MODE LIMIT 1'
+                'SELECT ContentDocumentId__c FROM CaseRelatedFile ' + crfWhere + ' WITH USER_MODE LIMIT 1'
             );
             if (crfList.isEmpty()) {
                 out.success = false;
-                out.abortReason = 'CRF record not found: ' + inp.crfId;
+                out.abortReason = 'No Case Related File found for "' + inp.crfId + '". Please check the record name or ID.';
                 out.agentNarration = 'Pre-validation aborted: ' + out.abortReason;
                 return out;
             }

@@ -27,19 +27,24 @@ public with sharing class RosterContextAction {
             return out;
         }
 
+        // Support both 18-char Salesforce ID and human-readable Name (e.g. CRF-000000001)
+        String whereClause = (crfId.length() == 15 || crfId.length() == 18)
+            ? 'WHERE Id = :crfId'
+            : 'WHERE Name = :crfId';
         List<SObject> records = Database.query(
             'SELECT Id, Name, ProcessStage__c, ProcessStatus__c, ' +
             'SourceDatasetName__c, TargetDatasetName__c, ' +
             'ContentDocumentId__c, CaseId__c, ProcessDefinitionReferenceId__c ' +
             'FROM CaseRelatedFile ' +
-            'WHERE Id = :crfId ' +
-            'WITH USER_MODE ' +
+            + whereClause +
+            ' WITH USER_MODE ' +
             'LIMIT 1'
         );
 
         if (records.isEmpty()) {
             out.success = false;
-            out.errorMessage = 'Case Related File record not found for ID: ' + crfId + '. Please verify the record ID and try again.';
+            out.errorMessage = 'No Case Related File found for "' + crfId + '". Please check the record name or ID and try again.';
+            out.agentResumeInstruction = 'ERROR: ' + out.errorMessage;
             return out;
         }
 

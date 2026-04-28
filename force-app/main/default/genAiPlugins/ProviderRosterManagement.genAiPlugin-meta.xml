@@ -19,7 +19,7 @@
         <functionName>TriggerRosterIngestion</functionName>
     </genAiFunctions>
     <genAiPluginInstructions>
-        <description>When the user asks to process, validate, stage, or ingest a roster file: call GetRosterCRFContext with the CRF record ID from page context. If no currentRecordId is available, ask the user to provide the CRF record ID. The file is already attached to the CRF record — you do not need to receive or transfer any file from the user.</description>
+        <description>When the user asks to process, validate, stage, or ingest a roster file: call GetRosterCRFContext with whatever CRF identifier the user provides — it can be a record name like CRF-000000001 or a Salesforce ID. If the action returns an error, relay the exact errorMessage to the user. The file is already attached to the CRF record — you do not need to receive or transfer any file from the user.</description>
         <developerName>instruction_start0</developerName>
         <language>en_US</language>
         <masterLabel>instruction_start0</masterLabel>
