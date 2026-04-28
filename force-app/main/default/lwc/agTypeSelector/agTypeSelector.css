@@ -1,0 +1,23 @@
+.type-card {
+    border: 2px solid #c9c9c9;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: white;
+}
+
+.type-card:hover {
+    border-color: #0176d3;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.type-card-selected {
+    border: 3px solid #0176d3;
+    background-color: #f3f9ff;
+    box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.2);
+}
+
+.type-card-selected:hover {
+    border-color: #014486;
+}

@@ -1,0 +1,280 @@
+<template>
+    <lightning-card title="Provider Roster File Upload" icon-name="standard:contact_list">
+        <div class="slds-p-around_medium">
+
+            <!-- Progress Indicator -->
+            <div class="slds-path">
+                <div class="slds-grid slds-path__track">
+                    <div class="slds-grid slds-path__scroller-container">
+                        <div class="slds-path__scroller">
+                            <ul class="slds-path__scroller_inner" role="listbox">
+                                <template for:each={stages} for:item="stage">
+                                    <li key={stage.value}
+                                        class={stage.cssClass}
+                                        role="option">
+                                        <a class="slds-path__link">
+                                            <span class="slds-path__stage">
+                                                <lightning-icon icon-name={stage.icon} size="x-small"></lightning-icon>
+                                            </span>
+                                            <span class="slds-path__title">{stage.label}</span>
+                                        </a>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 1: Upload -->
+            <template if:true={isStageUpload}>
+                <div class="slds-m-top_large">
+                    <div class="slds-box slds-theme_shade slds-text-align_center slds-p-around_large"
+                         ondragover={handleDragOver}
+                         ondrop={handleDrop}>
+                        <lightning-icon icon-name="doctype:csv" size="large" class="slds-m-bottom_small"></lightning-icon>
+                        <p class="slds-text-heading_small slds-m-bottom_small">
+                            Drag &amp; drop your roster file here
+                        </p>
+                        <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_medium">
+                            Accepted formats: CSV, XLSX &bull; Max size: 5 MB
+                        </p>
+                        <lightning-file-upload
+                            label="Or browse to upload"
+                            name="rosterFile"
+                            accept=".csv,.xlsx"
+                            record-id={recordId}
+                            onuploadfinished={handleFileUploaded}
+                            multiple="false">
+                        </lightning-file-upload>
+                    </div>
+
+                    <template if:true={uploadedFileName}>
+                        <div class="slds-m-top_medium slds-notify slds-notify_alert slds-theme_success" role="alert">
+                            <lightning-icon icon-name="utility:check" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                            <strong>{uploadedFileName}</strong> uploaded successfully. Ready to validate.
+                        </div>
+                        <div class="slds-m-top_medium slds-align_absolute-center">
+                            <lightning-button
+                                variant="brand"
+                                label="Validate File"
+                                onclick={handleValidate}
+                                disabled={isLoading}>
+                            </lightning-button>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- STAGE 2: Validate -->
+            <template if:true={isStageValidate}>
+                <template if:true={isLoading}>
+                    <div class="slds-align_absolute-center slds-m-top_large">
+                        <lightning-spinner alternative-text="Validating file..." size="medium"></lightning-spinner>
+                        <p class="slds-m-top_medium slds-text-body_regular">Checking file structure, NPI formats, and required fields...</p>
+                    </div>
+                </template>
+
+                <template if:false={isLoading}>
+                    <!-- Validation Summary Cards -->
+                    <div class="slds-grid slds-gutters slds-m-top_medium">
+                        <div class="slds-col slds-size_1-of-3">
+                            <div class="slds-box slds-theme_success slds-text-align_center">
+                                <p class="slds-text-heading_large">{validationSummary.valid}</p>
+                                <p class="slds-text-body_small">Valid Records</p>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3">
+                            <div class="slds-box slds-theme_warning slds-text-align_center">
+                                <p class="slds-text-heading_large">{validationSummary.warnings}</p>
+                                <p class="slds-text-body_small">Warnings</p>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3">
+                            <div class="slds-box slds-theme_error slds-text-align_center">
+                                <p class="slds-text-heading_large">{validationSummary.errors}</p>
+                                <p class="slds-text-body_small">Errors (must fix)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error Table -->
+                    <template if:true={hasErrors}>
+                        <div class="slds-m-top_medium">
+                            <h3 class="slds-text-heading_small slds-m-bottom_small">Issues Found — Please fix before proceeding</h3>
+                            <lightning-datatable
+                                key-field="rowNum"
+                                data={validationErrors}
+                                columns={errorColumns}
+                                hide-checkbox-column>
+                            </lightning-datatable>
+                            <div class="slds-m-top_medium slds-notify slds-notify_alert slds-theme_warning" role="alert">
+                                <lightning-icon icon-name="utility:warning" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                                Fix the errors above, then re-upload the corrected file.
+                                <lightning-button-icon icon-name="utility:download" variant="bare"
+                                    alternative-text="Download error report"
+                                    onclick={downloadErrorReport}
+                                    class="slds-m-left_small">
+                                </lightning-button-icon>
+                                <span class="slds-text-body_small"> Download error report</span>
+                            </div>
+                            <div class="slds-m-top_small slds-align_absolute-center">
+                                <lightning-button label="Start Over" onclick={handleReset}></lightning-button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- No errors — proceed -->
+                    <template if:false={hasErrors}>
+                        <div class="slds-m-top_medium slds-notify slds-notify_alert slds-theme_success" role="alert">
+                            <lightning-icon icon-name="utility:check" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                            All records passed validation. Ready to stage.
+                        </div>
+                        <div class="slds-m-top_medium slds-align_absolute-center">
+                            <lightning-button
+                                variant="brand"
+                                label="Stage Changes"
+                                onclick={handleStage}>
+                            </lightning-button>
+                        </div>
+                    </template>
+                </template>
+            </template>
+
+            <!-- STAGE 3: Stage / Preview -->
+            <template if:true={isStageStage}>
+                <template if:true={isLoading}>
+                    <div class="slds-align_absolute-center slds-m-top_large">
+                        <lightning-spinner alternative-text="Staging changes..." size="medium"></lightning-spinner>
+                        <p class="slds-m-top_medium">Comparing roster file against current provider records...</p>
+                    </div>
+                </template>
+
+                <template if:false={isLoading}>
+                    <div class="slds-m-top_medium">
+                        <h3 class="slds-text-heading_small slds-m-bottom_medium">Review Proposed Changes</h3>
+
+                        <div class="slds-grid slds-gutters slds-m-bottom_medium">
+                            <div class="slds-col slds-size_1-of-4">
+                                <div class="slds-box slds-text-align_center">
+                                    <p class="slds-text-heading_large slds-text-color_success">{stagingSummary.newProviders}</p>
+                                    <p class="slds-text-body_small">New Providers</p>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-4">
+                                <div class="slds-box slds-text-align_center">
+                                    <p class="slds-text-heading_large slds-text-color_default">{stagingSummary.updated}</p>
+                                    <p class="slds-text-body_small">Updated</p>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-4">
+                                <div class="slds-box slds-text-align_center">
+                                    <p class="slds-text-heading_large slds-text-color_error">{stagingSummary.removed}</p>
+                                    <p class="slds-text-body_small">Removed from Network</p>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-4">
+                                <div class="slds-box slds-text-align_center">
+                                    <p class="slds-text-heading_large slds-text-color_weak">{stagingSummary.noChange}</p>
+                                    <p class="slds-text-body_small">No Change</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <lightning-datatable
+                            key-field="npi"
+                            data={stagedChanges}
+                            columns={stagingColumns}
+                            hide-checkbox-column>
+                        </lightning-datatable>
+
+                        <div class="slds-m-top_large slds-grid slds-grid_align-center slds-gutters">
+                            <div class="slds-col slds-size_1-of-4">
+                                <lightning-button label="Back" onclick={handleBack}></lightning-button>
+                            </div>
+                            <div class="slds-col slds-size_1-of-4">
+                                <lightning-button
+                                    variant="brand"
+                                    label="Confirm &amp; Ingest"
+                                    onclick={handleConfirmIngest}>
+                                </lightning-button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+            <!-- STAGE 4: Ingesting -->
+            <template if:true={isStageIngest}>
+                <div class="slds-align_absolute-center slds-m-top_large slds-p-around_large">
+                    <template if:true={isLoading}>
+                        <lightning-spinner alternative-text="Ingesting records..." size="large"></lightning-spinner>
+                        <div class="slds-m-top_medium slds-text-align_center">
+                            <p class="slds-text-heading_small">Ingesting Provider Roster</p>
+                            <p class="slds-text-body_regular slds-text-color_weak">Please do not close this window.</p>
+                            <div class="slds-m-top_medium">
+                                <lightning-progress-bar value={ingestProgress} size="large"></lightning-progress-bar>
+                                <p class="slds-text-body_small slds-m-top_x-small">{ingestProgressLabel}</p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- STAGE 5: Summary -->
+            <template if:true={isStageSummary}>
+                <div class="slds-m-top_medium">
+                    <!-- Success Banner -->
+                    <template if:true={ingestSuccess}>
+                        <div class="slds-notify slds-notify_alert slds-theme_success slds-m-bottom_medium" role="alert">
+                            <lightning-icon icon-name="utility:check" size="small" class="slds-m-right_small"></lightning-icon>
+                            <strong>Roster ingestion complete!</strong> Here's what changed in your Provider Network.
+                        </div>
+                    </template>
+
+                    <!-- Partial failure banner -->
+                    <template if:false={ingestSuccess}>
+                        <div class="slds-notify slds-notify_alert slds-theme_warning slds-m-bottom_medium" role="alert">
+                            <lightning-icon icon-name="utility:warning" size="small" class="slds-m-right_small"></lightning-icon>
+                            <strong>Ingestion completed with some issues.</strong> Review the details below.
+                        </div>
+                    </template>
+
+                    <!-- Plain-English Summary -->
+                    <div class="slds-box slds-theme_shade slds-m-bottom_medium">
+                        <h3 class="slds-text-heading_small slds-m-bottom_small">What Changed</h3>
+                        <p class="slds-text-body_regular">{ingestSummaryText}</p>
+                    </div>
+
+                    <!-- Change Detail Table -->
+                    <lightning-datatable
+                        key-field="npi"
+                        data={ingestResults}
+                        columns={summaryColumns}
+                        hide-checkbox-column>
+                    </lightning-datatable>
+
+                    <!-- Audit Reference -->
+                    <div class="slds-m-top_medium slds-box slds-theme_info">
+                        <lightning-icon icon-name="utility:record" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                        Audit log saved: <strong>{auditRecordName}</strong> &bull; Reference ID: <strong>{auditRecordId}</strong>
+                    </div>
+
+                    <div class="slds-m-top_medium slds-align_absolute-center">
+                        <lightning-button
+                            variant="brand"
+                            label="Upload Another Roster"
+                            onclick={handleReset}>
+                        </lightning-button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Global spinner overlay for transitions -->
+            <template if:true={showGlobalSpinner}>
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </template>
+
+        </div>
+    </lightning-card>
+</template>

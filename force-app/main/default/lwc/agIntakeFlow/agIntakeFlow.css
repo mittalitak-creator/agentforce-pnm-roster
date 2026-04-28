@@ -1,0 +1,53 @@
+/* Custom styling following SLDS principles */
+
+/* Educational box styling */
+.slds-box_xx-small {
+    padding: var(--slds-c-card-spacing-block-start, var(--sds-c-card-spacing-block-start, 0.75rem));
+}
+
+/* Member details definition list */
+dl dd {
+    font-weight: 400;
+}
+
+dl dt {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.0625rem;
+}
+
+/* Success illustration */
+.slds-illustration_small {
+    padding: var(--slds-c-card-spacing-block-start, 1rem) 0;
+}
+
+/* Priority badge styling using styling hooks */
+.slds-theme_error {
+    --slds-c-badge-color-background: var(--slds-g-color-error-base-40, #ea001e);
+    --slds-c-badge-text-color: var(--slds-g-color-neutral-base-100, #ffffff);
+}
+
+/* Responsive adjustments */
+@media (max-width: 48em) {
+    .slds-text-align_right {
+        text-align: left !important;
+    }
+    
+    lightning-button {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+}
+
+/* Focus states for accessibility */
+lightning-input:focus-within,
+lightning-combobox:focus-within,
+lightning-textarea:focus-within {
+    outline: 2px solid var(--slds-g-color-brand-base-60, #0176d3);
+    outline-offset: 2px;
+}
+
+/* Loading state */
+lightning-spinner {
+    z-index: 9999;
+}

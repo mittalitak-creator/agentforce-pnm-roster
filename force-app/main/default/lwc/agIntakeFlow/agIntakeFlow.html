@@ -1,0 +1,354 @@
+<template>
+    <!-- Member Search & Verification Section -->
+    <lightning-card title="Member Search" icon-name="standard:contact">
+        <div class="slds-p-around_medium">
+            
+            <!-- Search Form -->
+            <div class="slds-grid slds-wrap slds-gutters">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                    <lightning-input 
+                        label="Member ID" 
+                        value={memberId}
+                        onchange={handleMemberIdChange}
+                        placeholder="Enter Member ID (e.g., MEM001)">
+                    </lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                    <div class="slds-text-align_right slds-m-top_large">
+                        <lightning-button 
+                            variant="brand" 
+                            label="Search Member" 
+                            onclick={handleSearchMember}
+                            disabled={isSearching}
+                            icon-name="utility:search">
+                        </lightning-button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Or Divider -->
+            <div class="slds-text-align_center slds-m-vertical_medium">
+                <span class="slds-text-color_weak">or search by</span>
+            </div>
+
+            <!-- Advanced Search -->
+            <div class="slds-grid slds-wrap slds-gutters">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                    <lightning-input 
+                        label="First Name" 
+                        value={firstName}
+                        onchange={handleFirstNameChange}>
+                    </lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                    <lightning-input 
+                        label="Last Name" 
+                        value={lastName}
+                        onchange={handleLastNameChange}>
+                    </lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                    <lightning-input 
+                        type="date" 
+                        label="Date of Birth" 
+                        value={dateOfBirth}
+                        onchange={handleDobChange}>
+                    </lightning-input>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <template if:true={isSearching}>
+                <div class="slds-m-top_medium">
+                    <lightning-spinner alternative-text="Searching..." size="small"></lightning-spinner>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+
+    <!-- Member Details Card (shown after search) -->
+    <template if:true={memberFound}>
+        <lightning-card title="Member Details" icon-name="standard:account" class="slds-m-top_medium">
+            <div slot="actions">
+                <lightning-badge label={lineOfBusiness} class="slds-m-right_x-small"></lightning-badge>
+            </div>
+            
+            <div class="slds-p-around_medium">
+                <!-- Member Information Grid -->
+                <dl class="slds-grid slds-wrap slds-gutters_small">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <dt class="slds-text-title slds-m-bottom_xx-small">Member ID</dt>
+                        <dd class="slds-text-body_regular slds-m-bottom_small">{memberDetails.memberId}</dd>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <dt class="slds-text-title slds-m-bottom_xx-small">Name</dt>
+                        <dd class="slds-text-body_regular slds-m-bottom_small">{memberDetails.fullName}</dd>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <dt class="slds-text-title slds-m-bottom_xx-small">Date of Birth</dt>
+                        <dd class="slds-text-body_regular slds-m-bottom_small">{memberDetails.dateOfBirth}</dd>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <dt class="slds-text-title slds-m-bottom_xx-small">Line of Business</dt>
+                        <dd class="slds-text-body_regular slds-m-bottom_small">{memberDetails.lineOfBusiness}</dd>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <dt class="slds-text-title slds-m-bottom_xx-small">Phone</dt>
+                        <dd class="slds-text-body_regular slds-m-bottom_small">{memberDetails.phone}</dd>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <dt class="slds-text-title slds-m-bottom_xx-small">Email</dt>
+                        <dd class="slds-text-body_regular slds-m-bottom_small">{memberDetails.email}</dd>
+                    </div>
+                </dl>
+
+                <!-- Confirmation -->
+                <div class="slds-m-top_medium slds-text-align_right">
+                    <lightning-button 
+                        label="Different Member" 
+                        onclick={handleReset}
+                        class="slds-m-right_x-small">
+                    </lightning-button>
+                    <lightning-button 
+                        variant="brand" 
+                        label="Confirm & Continue" 
+                        onclick={handleConfirmMember}
+                        icon-name="utility:check">
+                    </lightning-button>
+                </div>
+            </div>
+        </lightning-card>
+    </template>
+
+    <!-- Case Type Selection (shown after member confirmation) -->
+    <template if:true={showCaseTypeSelection}>
+        <lightning-card title="Case Type" icon-name="standard:case" class="slds-m-top_medium">
+            <div class="slds-p-around_medium">
+                
+                <!-- Educational Content -->
+                <div class="slds-box slds-box_xx-small slds-theme_shade slds-m-bottom_medium">
+                    <p class="slds-text-heading_small slds-m-bottom_small">Select the type of case you need to file:</p>
+                    
+                    <dl class="slds-m-top_small">
+                        <dt class="slds-text-title slds-text-title_caps slds-m-bottom_xx-small">
+                            <lightning-icon icon-name="utility:approval" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                            Appeal
+                        </dt>
+                        <dd class="slds-m-bottom_small slds-m-left_large">
+                            A request to review a decision about coverage, payment, or services.
+                            <br/>
+                            <span class="slds-text-color_weak slds-text-body_small">
+                                Examples: Denied claim, prior authorization denial, formulary exception
+                            </span>
+                        </dd>
+                        
+                        <dt class="slds-text-title slds-text-title_caps slds-m-bottom_xx-small slds-m-top_small">
+                            <lightning-icon icon-name="utility:comments" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                            Grievance
+                        </dt>
+                        <dd class="slds-m-left_large">
+                            A complaint about service quality, access to care, or provider behavior.
+                            <br/>
+                            <span class="slds-text-color_weak slds-text-body_small">
+                                Examples: Wait times, staff behavior, billing issues, quality of care concerns
+                            </span>
+                        </dd>
+                    </dl>
+                </div>
+
+                <!-- Type Selection Buttons -->
+                <lightning-radio-group 
+                    name="caseType"
+                    label="Which type of case do you need to file?"
+                    options={caseTypeOptions}
+                    value={selectedCaseType}
+                    onchange={handleCaseTypeChange}
+                    type="button"
+                    required>
+                </lightning-radio-group>
+            </div>
+        </lightning-card>
+    </template>
+
+    <!-- Appeal/Grievance Details Form (shown after case type selection) -->
+    <template if:true={showDetailsForm}>
+        <lightning-card 
+            title={detailsFormTitle} 
+            icon-name={detailsFormIcon} 
+            class="slds-m-top_medium">
+            
+            <div class="slds-p-around_medium">
+                
+                <!-- Appeal Type Selection -->
+                <template if:true={isAppeal}>
+                    <lightning-combobox
+                        name="appealType"
+                        label="Appeal Type"
+                        value={selectedAppealType}
+                        placeholder="Select Appeal Type"
+                        options={appealTypeOptions}
+                        onchange={handleAppealTypeChange}
+                        required>
+                    </lightning-combobox>
+
+                    <!-- Appeal Sub-Type (conditional) -->
+                    <template if:true={showAppealSubType}>
+                        <lightning-combobox
+                            name="appealSubType"
+                            label="Appeal Sub-Type"
+                            value={selectedAppealSubType}
+                            placeholder="Select Appeal Sub-Type"
+                            options={appealSubTypeOptions}
+                            onchange={handleAppealSubTypeChange}
+                            class="slds-m-top_small"
+                            required>
+                        </lightning-combobox>
+                    </template>
+                </template>
+
+                <!-- Grievance Type Selection -->
+                <template if:true={isGrievance}>
+                    <lightning-combobox
+                        name="grievanceType"
+                        label="Grievance Type"
+                        value={selectedGrievanceType}
+                        placeholder="Select Grievance Type"
+                        options={grievanceTypeOptions}
+                        onchange={handleGrievanceTypeChange}
+                        required>
+                    </lightning-combobox>
+
+                    <!-- Grievance Sub-Type (conditional) -->
+                    <template if:true={showGrievanceSubType}>
+                        <lightning-combobox
+                            name="grievanceSubType"
+                            label="Grievance Sub-Type"
+                            value={selectedGrievanceSubType}
+                            placeholder="Select Grievance Sub-Type"
+                            options={grievanceSubTypeOptions}
+                            onchange={handleGrievanceSubTypeChange}
+                            class="slds-m-top_small"
+                            required>
+                        </lightning-combobox>
+                    </template>
+                </template>
+
+                <!-- Service Type -->
+                <lightning-radio-group
+                    name="serviceType"
+                    label="Service Type"
+                    options={serviceTypeOptions}
+                    value={selectedServiceType}
+                    onchange={handleServiceTypeChange}
+                    type="button"
+                    class="slds-m-top_medium"
+                    required>
+                </lightning-radio-group>
+
+                <!-- Reason for Request -->
+                <lightning-textarea
+                    name="reason"
+                    label="Reason for Request"
+                    value={reason}
+                    onchange={handleReasonChange}
+                    placeholder="Please provide detailed reason..."
+                    class="slds-m-top_medium"
+                    required>
+                </lightning-textarea>
+
+                <!-- Urgency -->
+                <lightning-input
+                    type="checkbox"
+                    label="This is an urgent/expedited request"
+                    checked={isUrgent}
+                    onchange={handleUrgencyChange}
+                    class="slds-m-top_medium">
+                </lightning-input>
+
+                <template if:true={isUrgent}>
+                    <div class="slds-m-top_small">
+                        <lightning-formatted-text 
+                            value="⚠️ This case will be marked as urgent and prioritized for review."
+                            class="slds-text-color_warning">
+                        </lightning-formatted-text>
+                    </div>
+                </template>
+
+                <!-- Action Buttons -->
+                <div class="slds-m-top_large slds-text-align_right">
+                    <lightning-button 
+                        label="Back" 
+                        onclick={handleBack}
+                        class="slds-m-right_x-small">
+                    </lightning-button>
+                    <lightning-button 
+                        variant="brand" 
+                        label="Submit Case" 
+                        onclick={handleSubmitCase}
+                        disabled={isSubmitting}
+                        icon-name="utility:save">
+                    </lightning-button>
+                </div>
+            </div>
+        </lightning-card>
+    </template>
+
+    <!-- Success Confirmation -->
+    <template if:true={caseCreated}>
+        <lightning-card 
+            title="Case Created Successfully" 
+            icon-name="utility:success" 
+            class="slds-m-top_medium">
+            
+            <div class="slds-p-around_medium">
+                <div class="slds-illustration slds-illustration_small">
+                    <div class="slds-text-align_center">
+                        <lightning-icon 
+                            icon-name="utility:success" 
+                            size="large" 
+                            variant="success">
+                        </lightning-icon>
+                    </div>
+                </div>
+
+                <dl class="slds-grid slds-wrap slds-gutters_small slds-m-top_medium">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <dt class="slds-text-title slds-m-bottom_xx-small">Case Number</dt>
+                        <dd class="slds-text-heading_medium slds-m-bottom_small">{createdCase.caseNumber}</dd>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <dt class="slds-text-title slds-m-bottom_xx-small">Status</dt>
+                        <dd class="slds-m-bottom_small">
+                            <lightning-badge label={createdCase.status}></lightning-badge>
+                        </dd>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <dt class="slds-text-title slds-m-bottom_xx-small">Priority</dt>
+                        <dd class="slds-m-bottom_small">
+                            <lightning-badge label={createdCase.priority} class={priorityClass}></lightning-badge>
+                        </dd>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <dt class="slds-text-title slds-m-bottom_xx-small">Created Date</dt>
+                        <dd class="slds-m-bottom_small">
+                            <lightning-formatted-date-time value={createdCase.createdDate}></lightning-formatted-date-time>
+                        </dd>
+                    </div>
+                </dl>
+
+                <div class="slds-m-top_large slds-text-align_right">
+                    <lightning-button 
+                        label="View Case" 
+                        onclick={handleViewCase}
+                        class="slds-m-right_x-small">
+                    </lightning-button>
+                    <lightning-button 
+                        variant="brand" 
+                        label="File Another Case" 
+                        onclick={handleReset}>
+                    </lightning-button>
+                </div>
+            </div>
+        </lightning-card>
+    </template>
+</template>

@@ -1,0 +1,12 @@
+{
+  "packageDirectories": [
+    {
+      "path": "force-app",
+      "default": true
+    }
+  ],
+  "name": "Appeals&amp;Grievances",
+  "namespace": "",
+  "sfdcLoginUrl": "https://orgfarm-a21ec90cd7.test1.my.pc-rnd.salesforce.com",
+  "sourceApiVersion": "65.0"
+}

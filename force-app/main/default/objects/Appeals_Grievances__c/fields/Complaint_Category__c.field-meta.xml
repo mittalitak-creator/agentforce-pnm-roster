@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Complaint_Category__c</fullName>
+    <label>Complaint Category</label>
+    <type>Picklist</type>
+    <required>false</required>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Enrollment / Disenrollment</fullName>
+                <default>false</default>
+                <label>Enrollment / Disenrollment</label>
+            </value>
+            <value>
+                <fullName>Benefit Design</fullName>
+                <default>false</default>
+                <label>Benefit Design</label>
+            </value>
+            <value>
+                <fullName>Administrative / Processing</fullName>
+                <default>false</default>
+                <label>Administrative / Processing</label>
+            </value>
+            <value>
+                <fullName>Marketing / Sales</fullName>
+                <default>false</default>
+                <label>Marketing / Sales</label>
+            </value>
+            <value>
+                <fullName>Access to Care</fullName>
+                <default>false</default>
+                <label>Access to Care</label>
+            </value>
+            <value>
+                <fullName>Pharmacy / Part D</fullName>
+                <default>false</default>
+                <label>Pharmacy / Part D</label>
+            </value>
+            <value>
+                <fullName>Customer Service</fullName>
+                <default>false</default>
+                <label>Customer Service</label>
+            </value>
+            <value>
+                <fullName>Payment / Claims</fullName>
+                <default>false</default>
+                <label>Payment / Claims</label>
+            </value>
+            <value>
+                <fullName>Quality of Care (QOC)</fullName>
+                <default>false</default>
+                <label>Quality of Care (QOC)</label>
+            </value>
+            <value>
+                <fullName>Lead / Program Integrity</fullName>
+                <default>false</default>
+                <label>Lead / Program Integrity</label>
+            </value>
+            <value>
+                <fullName>Clinical / Medical Necessity</fullName>
+                <default>false</default>
+                <label>Clinical / Medical Necessity</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
+

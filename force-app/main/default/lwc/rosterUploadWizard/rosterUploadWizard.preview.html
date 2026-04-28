@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roster Upload Wizard — SLDS Preview</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/design-system/2.22.2/styles/salesforce-lightning-design-system.min.css" />
+  <style>
+    body { background: #f3f3f3; padding: 32px; font-family: 'Salesforce Sans', Arial, sans-serif; }
+    .preview-card { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 900px; margin: 0 auto; padding: 24px; }
+    .stage-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+    .stage-tab { padding: 8px 18px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; border: 2px solid #0070d2; color: #0070d2; background: #fff; }
+    .stage-tab.active { background: #0070d2; color: #fff; }
+    .stage-panel { display: none; }
+    .stage-panel.visible { display: block; }
+    .dropzone { border: 2px dashed #dddbda; border-radius: 8px; padding: 48px; text-align: center; background: #f9f9f9; transition: border-color 0.2s; }
+    .dropzone:hover { border-color: #0070d2; background: #f0f5ff; }
+    .stat-card { border-radius: 6px; padding: 20px; text-align: center; }
+    .stat-number { font-size: 2rem; font-weight: 700; margin-bottom: 4px; }
+    .change-new { color: #04844b; }
+    .change-updated { color: #0070d2; }
+    .change-removed { color: #c23934; }
+    .change-nochange { color: #706e6b; }
+    .progress-track { display: flex; align-items: center; gap: 0; margin-bottom: 28px; }
+    .progress-step { flex: 1; text-align: center; position: relative; }
+    .progress-step .step-circle { width: 32px; height: 32px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+    .progress-step .step-label { font-size: 11px; font-weight: 600; }
+    .progress-step::before { content: ''; position: absolute; top: 16px; left: -50%; width: 100%; height: 2px; background: #dddbda; z-index: 0; }
+    .progress-step:first-child::before { display: none; }
+    .step-complete .step-circle { background: #04844b; color: #fff; }
+    .step-complete::before { background: #04844b !important; }
+    .step-active .step-circle { background: #0070d2; color: #fff; box-shadow: 0 0 0 3px #d8edff; }
+    .step-inactive .step-circle { background: #ecebea; color: #706e6b; }
+    .step-circle { position: relative; z-index: 1; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #f3f3f3; padding: 10px 12px; text-align: left; font-weight: 600; color: #3e3e3c; border-bottom: 2px solid #dddbda; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f0f0ef; }
+    tr:hover td { background: #f8f8f8; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+    .badge-new { background: #e3f5ec; color: #04844b; }
+    .badge-updated { background: #e0eeff; color: #0070d2; }
+    .badge-removed { background: #fce9e9; color: #c23934; }
+    .badge-nochange { background: #f3f3f3; color: #706e6b; }
+    .badge-success { background: #e3f5ec; color: #04844b; }
+    .badge-error { background: #fce9e9; color: #c23934; }
+    .badge-warning { background: #fff4d0; color: #a8601c; }
+    .alert-success { background: #e3f5ec; border-left: 4px solid #04844b; padding: 12px 16px; border-radius: 4px; margin-bottom: 16px; }
+    .alert-error { background: #fce9e9; border-left: 4px solid #c23934; padding: 12px 16px; border-radius: 4px; margin-bottom: 16px; }
+    .alert-warning { background: #fff4d0; border-left: 4px solid #a8601c; padding: 12px 16px; border-radius: 4px; margin-bottom: 16px; }
+    .alert-info { background: #e0eeff; border-left: 4px solid #0070d2; padding: 12px 16px; border-radius: 4px; margin-bottom: 16px; }
+    .summary-box { background: #f9f9f9; border: 1px solid #dddbda; border-radius: 6px; padding: 16px 20px; margin-bottom: 16px; }
+    .audit-box { background: #e0eeff; border-radius: 6px; padding: 12px 16px; font-size: 13px; }
+    .progress-bar-outer { height: 12px; background: #ecebea; border-radius: 6px; overflow: hidden; }
+    .progress-bar-inner { height: 100%; background: #0070d2; border-radius: 6px; transition: width 0.4s; }
+    .slds-btn { display: inline-block; padding: 8px 24px; border-radius: 4px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; }
+    .slds-btn-brand { background: #0070d2; color: #fff; }
+    .slds-btn-brand:hover { background: #005fb2; }
+    .slds-btn-neutral { background: #fff; color: #0070d2; border: 1px solid #0070d2; }
+    .slds-btn-neutral:hover { background: #f0f5ff; }
+    .section-title { font-size: 15px; font-weight: 700; color: #16325c; margin-bottom: 12px; }
+    .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #f0f0ef; }
+    .card-icon { width: 40px; height: 40px; background: #0070d2; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+    .card-icon svg { fill: #fff; width: 22px; height: 22px; }
+  </style>
+</head>
+<body>
+
+<div class="preview-card">
+
+  <!-- Header -->
+  <div class="card-header">
+    <div class="card-icon">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+    </div>
+    <div>
+      <div style="font-size:18px; font-weight:700; color:#16325c;">Provider Roster File Upload</div>
+      <div style="font-size:12px; color:#706e6b;">Provider Network Management · Admin Tool</div>
+    </div>
+  </div>
+
+  <!-- Stage selector tabs (preview navigation) -->
+  <div style="margin-bottom:8px; font-size:11px; color:#706e6b; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Preview stages →</div>
+  <div class="stage-tabs">
+    <button class="stage-tab active" onclick="showStage('upload', this)">1 · Upload</button>
+    <button class="stage-tab" onclick="showStage('validate-errors', this)">2a · Validate (errors)</button>
+    <button class="stage-tab" onclick="showStage('validate-ok', this)">2b · Validate (OK)</button>
+    <button class="stage-tab" onclick="showStage('stage', this)">3 · Review Changes</button>
+    <button class="stage-tab" onclick="showStage('ingest', this)">4 · Ingesting</button>
+    <button class="stage-tab" onclick="showStage('summary', this)">5 · Summary</button>
+  </div>
+
+  <!-- Progress tracker (shared) -->
+  <div class="progress-track" id="progress-track">
+    <div class="progress-step step-active" id="pt-upload">
+      <div class="step-circle">1</div>
+      <div class="step-label">Upload</div>
+    </div>
+    <div class="progress-step step-inactive" id="pt-validate">
+      <div class="step-circle">2</div>
+      <div class="step-label">Validate</div>
+    </div>
+    <div class="progress-step step-inactive" id="pt-stage">
+      <div class="step-circle">3</div>
+      <div class="step-label">Review</div>
+    </div>
+    <div class="progress-step step-inactive" id="pt-ingest">
+      <div class="step-circle">4</div>
+      <div class="step-label">Ingest</div>
+    </div>
+    <div class="progress-step step-inactive" id="pt-summary">
+      <div class="step-circle">5</div>
+      <div class="step-label">Summary</div>
+    </div>
+  </div>
+
+  <!-- ======================== STAGE 1: UPLOAD ======================== -->
+  <div class="stage-panel visible" id="stage-upload">
+    <div class="dropzone" id="dropzone">
+      <div style="font-size:48px; margin-bottom:12px;">📄</div>
+      <div style="font-size:16px; font-weight:600; margin-bottom:6px;">Drag &amp; drop your roster file here</div>
+      <div style="font-size:13px; color:#706e6b; margin-bottom:20px;">Accepted formats: CSV, XLSX &nbsp;·&nbsp; Max size: 5 MB</div>
+      <button class="slds-btn slds-btn-brand" onclick="simulateUpload()">Browse &amp; Upload</button>
+    </div>
+    <div id="upload-success" style="display:none; margin-top:16px;">
+      <div class="alert-success">
+        ✅ &nbsp;<strong>provider_network_roster_Q2_2026.csv</strong> uploaded successfully. Ready to validate.
+      </div>
+      <div style="margin-top:12px; text-align:center;">
+        <button class="slds-btn slds-btn-brand" onclick="showStage('validate-errors', document.querySelectorAll('.stage-tab')[1])">Validate File →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== STAGE 2a: VALIDATE — ERRORS ======================== -->
+  <div class="stage-panel" id="stage-validate-errors">
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; margin-bottom:20px;">
+      <div class="stat-card" style="background:#e3f5ec;">
+        <div class="stat-number change-new">847</div>
+        <div style="font-size:13px; color:#04844b; font-weight:600;">Valid Records</div>
+      </div>
+      <div class="stat-card" style="background:#fff4d0;">
+        <div class="stat-number" style="color:#a8601c;">12</div>
+        <div style="font-size:13px; color:#a8601c; font-weight:600;">Warnings</div>
+      </div>
+      <div class="stat-card" style="background:#fce9e9;">
+        <div class="stat-number change-removed">5</div>
+        <div style="font-size:13px; color:#c23934; font-weight:600;">Errors (must fix)</div>
+      </div>
+    </div>
+
+    <div class="section-title">Issues Found — Please fix before proceeding</div>
+    <table>
+      <thead>
+        <tr><th>Row #</th><th>NPI</th><th>Provider Name</th><th>Issue</th><th>What to fix</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>14</td><td>123456789</td><td>Dr. Amanda Torres</td>
+          <td><span style="color:#c23934; font-weight:600;">Invalid NPI</span></td>
+          <td>NPI must be exactly 10 digits. Check column B, row 14 — value has only 9 digits.</td>
+        </tr>
+        <tr>
+          <td>27</td><td></td><td>Dr. Kevin Park</td>
+          <td><span style="color:#c23934; font-weight:600;">Missing NPI</span></td>
+          <td>NPI is required for all providers. Add the 10-digit NPI in column B, row 27.</td>
+        </tr>
+        <tr>
+          <td>45</td><td>1234567890</td><td></td>
+          <td><span style="color:#c23934; font-weight:600;">Missing Last Name</span></td>
+          <td>Last Name (column D) is required. Row 45 has no last name value.</td>
+        </tr>
+        <tr>
+          <td>82</td><td>9876543210</td><td>Dr. Sarah Lee</td>
+          <td><span style="color:#a8601c; font-weight:600;">Duplicate NPI</span></td>
+          <td>NPI 9876543210 appears in rows 82 and 83. Remove the duplicate entry.</td>
+        </tr>
+        <tr>
+          <td>101</td><td>5550001234</td><td>Sunrise Medical Group</td>
+          <td><span style="color:#a8601c; font-weight:600;">Invalid State Code</span></td>
+          <td>State value "CAL" is not valid. Use the 2-letter code, e.g. "CA".</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="alert-warning" style="margin-top:16px;">
+      ⚠️ &nbsp;Fix the errors above, then re-upload the corrected file.
+      &nbsp;<a href="#" style="color:#0070d2;">Download error report (CSV)</a>
+    </div>
+    <div style="text-align:center; margin-top:12px;">
+      <button class="slds-btn slds-btn-neutral" onclick="showStage('upload', document.querySelectorAll('.stage-tab')[0])">← Start Over</button>
+    </div>
+  </div>
+
+  <!-- ======================== STAGE 2b: VALIDATE — ALL CLEAR ======================== -->
+  <div class="stage-panel" id="stage-validate-ok">
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; margin-bottom:20px;">
+      <div class="stat-card" style="background:#e3f5ec;">
+        <div class="stat-number change-new">864</div>
+        <div style="font-size:13px; color:#04844b; font-weight:600;">Valid Records</div>
+      </div>
+      <div class="stat-card" style="background:#fff4d0;">
+        <div class="stat-number" style="color:#a8601c;">0</div>
+        <div style="font-size:13px; color:#a8601c; font-weight:600;">Warnings</div>
+      </div>
+      <div class="stat-card" style="background:#e3f5ec;">
+        <div class="stat-number change-new">0</div>
+        <div style="font-size:13px; color:#04844b; font-weight:600;">Errors</div>
+      </div>
+    </div>
+    <div class="alert-success">
+      ✅ &nbsp;All 864 records passed validation. Ready to stage changes.
+    </div>
+    <div style="text-align:center; margin-top:16px;">
+      <button class="slds-btn slds-btn-brand" onclick="showStage('stage', document.querySelectorAll('.stage-tab')[3])">Stage Changes →</button>
+    </div>
+  </div>
+
+  <!-- ======================== STAGE 3: REVIEW / STAGE ======================== -->
+  <div class="stage-panel" id="stage-stage">
+    <div class="section-title">Review Proposed Changes</div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:16px; margin-bottom:20px;">
+      <div class="stat-card" style="background:#e3f5ec;">
+        <div class="stat-number change-new">23</div>
+        <div style="font-size:13px; color:#04844b; font-weight:600;">New Providers</div>
+      </div>
+      <div class="stat-card" style="background:#e0eeff;">
+        <div class="stat-number change-updated">41</div>
+        <div style="font-size:13px; color:#0070d2; font-weight:600;">Updated</div>
+      </div>
+      <div class="stat-card" style="background:#fce9e9;">
+        <div class="stat-number change-removed">7</div>
+        <div style="font-size:13px; color:#c23934; font-weight:600;">Removed from Network</div>
+      </div>
+      <div class="stat-card" style="background:#f3f3f3;">
+        <div class="stat-number change-nochange">793</div>
+        <div style="font-size:13px; color:#706e6b; font-weight:600;">No Change</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>NPI</th><th>Provider Name</th><th>Change</th><th>Network</th><th>Fields Changing</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1234567890</td><td>Dr. Amanda Torres, MD</td>
+          <td><span class="badge badge-new">New</span></td>
+          <td>Blue Shield PPO</td>
+          <td>New record — all fields</td>
+        </tr>
+        <tr>
+          <td>9876543210</td><td>Dr. Kevin Park, DO</td>
+          <td><span class="badge badge-updated">Updated</span></td>
+          <td>Anthem HMO</td>
+          <td>Address, Phone, Specialty</td>
+        </tr>
+        <tr>
+          <td>5550001234</td><td>Sunrise Medical Group</td>
+          <td><span class="badge badge-updated">Updated</span></td>
+          <td>Medicare Advantage</td>
+          <td>Network Tier: Tier 2 → Tier 1</td>
+        </tr>
+        <tr>
+          <td>1112223330</td><td>Dr. Maria Santos, NP</td>
+          <td><span class="badge badge-removed">Removed</span></td>
+          <td>Blue Shield PPO</td>
+          <td>Network membership will be ended</td>
+        </tr>
+        <tr>
+          <td>4445556660</td><td>Valley Orthopedics LLC</td>
+          <td><span class="badge badge-new">New</span></td>
+          <td>Medicaid</td>
+          <td>New record — all fields</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:20px; display:flex; justify-content:center; gap:12px;">
+      <button class="slds-btn slds-btn-neutral" onclick="showStage('validate-ok', document.querySelectorAll('.stage-tab')[2])">← Back</button>
+      <button class="slds-btn slds-btn-brand" onclick="showStage('ingest', document.querySelectorAll('.stage-tab')[4])">Confirm &amp; Ingest →</button>
+    </div>
+  </div>
+
+  <!-- ======================== STAGE 4: INGESTING ======================== -->
+  <div class="stage-panel" id="stage-ingest">
+    <div style="text-align:center; padding:40px 20px;">
+      <div style="font-size:40px; margin-bottom:16px;">⚙️</div>
+      <div style="font-size:18px; font-weight:700; color:#16325c; margin-bottom:8px;">Ingesting Provider Roster</div>
+      <div style="font-size:13px; color:#706e6b; margin-bottom:24px;">Please do not close this window.</div>
+      <div style="max-width:400px; margin:0 auto;">
+        <div class="progress-bar-outer" style="margin-bottom:8px;">
+          <div class="progress-bar-inner" id="ingest-bar" style="width:0%"></div>
+        </div>
+        <div style="font-size:12px; color:#706e6b;" id="ingest-label">Starting ingestion...</div>
+        <button class="slds-btn slds-btn-neutral" style="margin-top:24px;" onclick="animateIngest()">▶ Simulate Progress</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== STAGE 5: SUMMARY ======================== -->
+  <div class="stage-panel" id="stage-summary">
+    <div class="alert-success">
+      ✅ &nbsp;<strong>Roster ingestion complete!</strong> Here's what changed in your Provider Network.
+    </div>
+
+    <div class="summary-box">
+      <div class="section-title" style="margin-bottom:8px;">What Changed</div>
+      <p style="font-size:14px; line-height:1.6; color:#3e3e3c;">
+        Your Q2 2026 provider roster has been successfully processed. <strong>23 new providers</strong> were added to the network,
+        <strong>41 existing providers</strong> had their address, phone, specialty, or tier information updated, and
+        <strong>7 providers</strong> were removed from the network per the updated roster.
+        793 providers had no changes and remain active. All changes were applied at 2:14 PM on April 27, 2026.
+      </p>
+    </div>
+
+    <table style="margin-bottom:16px;">
+      <thead>
+        <tr><th>NPI</th><th>Provider Name</th><th>Action Taken</th><th>Status</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1234567890</td><td>Dr. Amanda Torres, MD</td>
+          <td>Added to Network</td>
+          <td><span class="badge badge-success">Success</span></td>
+          <td>Blue Shield PPO — Tier 1</td>
+        </tr>
+        <tr>
+          <td>9876543210</td><td>Dr. Kevin Park, DO</td>
+          <td>Record Updated</td>
+          <td><span class="badge badge-success">Success</span></td>
+          <td>Address and specialty updated</td>
+        </tr>
+        <tr>
+          <td>1112223330</td><td>Dr. Maria Santos, NP</td>
+          <td>Removed from Network</td>
+          <td><span class="badge badge-success">Success</span></td>
+          <td>Network end date set to 04/27/2026</td>
+        </tr>
+        <tr>
+          <td>7778889990</td><td>Hillside Pediatrics</td>
+          <td>Record Updated</td>
+          <td><span class="badge badge-warning">Warning</span></td>
+          <td>Phone update skipped — validation rule on record</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="audit-box" style="margin-bottom:20px;">
+      📋 &nbsp;Audit log saved: <strong>ROSTER-2026-0427-001</strong> &nbsp;·&nbsp; Reference ID: <strong>a0DIf000000XyZMAA0</strong>
+      &nbsp;&nbsp;<a href="#" style="font-size:12px; color:#0070d2;">View full audit record →</a>
+    </div>
+
+    <div style="text-align:center;">
+      <button class="slds-btn slds-btn-brand" onclick="showStage('upload', document.querySelectorAll('.stage-tab')[0])">Upload Another Roster</button>
+    </div>
+  </div>
+
+</div><!-- end preview-card -->
+
+<script>
+  const stageProgressMap = {
+    'upload':           ['active','inactive','inactive','inactive','inactive'],
+    'validate-errors':  ['complete','active','inactive','inactive','inactive'],
+    'validate-ok':      ['complete','active','inactive','inactive','inactive'],
+    'stage':            ['complete','complete','active','inactive','inactive'],
+    'ingest':           ['complete','complete','complete','active','inactive'],
+    'summary':          ['complete','complete','complete','complete','active'],
+  };
+
+  function showStage(id, btn) {
+    document.querySelectorAll('.stage-panel').forEach(p => p.classList.remove('visible'));
+    document.querySelectorAll('.stage-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('stage-' + id).classList.add('visible');
+    if (btn) btn.classList.add('active');
+
+    const steps = ['upload','validate','stage','ingest','summary'];
+    const states = stageProgressMap[id];
+    steps.forEach((s, i) => {
+      const el = document.getElementById('pt-' + s);
+      el.className = 'progress-step step-' + states[i];
+    });
+  }
+
+  function simulateUpload() {
+    document.getElementById('upload-success').style.display = 'block';
+  }
+
+  let ingestTimer = null;
+  function animateIngest() {
+    let pct = 0;
+    const bar = document.getElementById('ingest-bar');
+    const lbl = document.getElementById('ingest-label');
+    const labels = ['Starting ingestion...', 'Creating new provider records... (23)', 'Updating existing records... (41)', 'Removing inactive providers... (7)', 'Writing audit log...', 'Finalizing...'];
+    if (ingestTimer) clearInterval(ingestTimer);
+    ingestTimer = setInterval(() => {
+      pct = Math.min(pct + 17, 100);
+      bar.style.width = pct + '%';
+      lbl.textContent = labels[Math.floor(pct / 20)] || 'Complete!';
+      if (pct >= 100) {
+        clearInterval(ingestTimer);
+        lbl.textContent = 'Done! Redirecting to summary...';
+        setTimeout(() => showStage('summary', document.querySelectorAll('.stage-tab')[5]), 1200);
+      }
+    }, 500);
+  }
+</script>
+</body>
+</html>

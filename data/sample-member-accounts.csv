@@ -1,0 +1,11 @@
+FirstName,LastName,Member_ID__c,PersonBirthdate,PersonEmail,Phone,PersonMailingStreet,PersonMailingCity,PersonMailingState,PersonMailingPostalCode,PersonMailingCountry
+John,Smith,MEM-001,1985-03-15,john.smith@example.com,(555) 123-4567,123 Main Street,San Francisco,CA,94102,USA
+Jane,Doe,MEM-002,1990-07-22,jane.doe@example.com,(555) 234-5678,456 Oak Avenue,Los Angeles,CA,90001,USA
+Michael,Johnson,MEM-003,1978-11-08,michael.johnson@example.com,(555) 345-6789,789 Pine Road,San Diego,CA,92101,USA
+Sarah,Williams,MEM-004,1995-05-30,sarah.williams@example.com,(555) 456-7890,321 Elm Street,Sacramento,CA,95814,USA
+Robert,Brown,MEM-005,1982-09-12,robert.brown@example.com,(555) 567-8901,654 Maple Drive,Fresno,CA,93721,USA
+Maria,Garcia,MEM-006,1988-02-14,maria.garcia@example.com,(555) 678-9012,987 Cedar Lane,Oakland,CA,94601,USA
+David,Martinez,MEM-007,1975-12-25,david.martinez@example.com,(555) 789-0123,147 Birch Court,San Jose,CA,95110,USA
+Linda,Rodriguez,MEM-008,1992-08-19,linda.rodriguez@example.com,(555) 890-1234,258 Willow Way,Riverside,CA,92501,USA
+James,Wilson,MEM-009,1980-06-03,james.wilson@example.com,(555) 901-2345,369 Spruce Street,Bakersfield,CA,93301,USA
+Patricia,Anderson,MEM-010,1987-10-28,patricia.anderson@example.com,(555) 012-3456,741 Redwood Boulevard,Anaheim,CA,92801,USA

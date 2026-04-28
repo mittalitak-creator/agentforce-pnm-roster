@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Case_sub_category__c</fullName>
+    <label>Case sub-category</label>
+    <type>Picklist</type>
+    <required>false</required>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Sub-Category 1</fullName>
+                <default>false</default>
+                <label>Sub-Category 1</label>
+            </value>
+            <value>
+                <fullName>Sub-Category 2</fullName>
+                <default>false</default>
+                <label>Sub-Category 2</label>
+            </value>
+            <value>
+                <fullName>Sub-Category 3</fullName>
+                <default>false</default>
+                <label>Sub-Category 3</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
+

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Appeal_Sub_Type__c</fullName>
+    <label>Appeal Sub-Type</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Inpatient Hospital Services</fullName>
+                <default>false</default>
+                <label>Inpatient Hospital Services</label>
+            </value>
+            <value>
+                <fullName>Outpatient Services</fullName>
+                <default>false</default>
+                <label>Outpatient Services</label>
+            </value>
+            <value>
+                <fullName>SNF Services</fullName>
+                <default>false</default>
+                <label>SNF Services</label>
+            </value>
+            <value>
+                <fullName>Home Health Services</fullName>
+                <default>false</default>
+                <label>Home Health Services</label>
+            </value>
+            <value>
+                <fullName>CORF Services</fullName>
+                <default>false</default>
+                <label>CORF Services</label>
+            </value>
+            <value>
+                <fullName>DME (Durable Medical Equipment)</fullName>
+                <default>false</default>
+                <label>DME (Durable Medical Equipment)</label>
+            </value>
+            <value>
+                <fullName>Part B Drug</fullName>
+                <default>false</default>
+                <label>Part B Drug</label>
+            </value>
+            <value>
+                <fullName>Part D Drug - Formulary Exception</fullName>
+                <default>false</default>
+                <label>Part D Drug - Formulary Exception</label>
+            </value>
+            <value>
+                <fullName>Part D Drug - Tiering Exception</fullName>
+                <default>false</default>
+                <label>Part D Drug - Tiering Exception</label>
+            </value>
+            <value>
+                <fullName>Part D Drug - Prior Authorization</fullName>
+                <default>false</default>
+                <label>Part D Drug - Prior Authorization</label>
+            </value>
+            <value>
+                <fullName>Emergency Services</fullName>
+                <default>false</default>
+                <label>Emergency Services</label>
+            </value>
+            <value>
+                <fullName>Urgently Needed Services</fullName>
+                <default>false</default>
+                <label>Urgently Needed Services</label>
+            </value>
+            <value>
+                <fullName>Payment Appeal</fullName>
+                <default>false</default>
+                <label>Payment Appeal</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

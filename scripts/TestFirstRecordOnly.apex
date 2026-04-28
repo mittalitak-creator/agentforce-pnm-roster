@@ -1,0 +1,20 @@
+// Test exact first record as in full script
+Account a = new Account(Name = 'Provider Org 1');
+insert a;
+System.debug('Account ok: ' + a.Id);
+Contact c = new Contact(FirstName = 'Provider', LastName = 'Contact1', AccountId = a.Id);
+insert c;
+System.debug('Contact ok: ' + c.Id);
+Schema.SObjectType t = Schema.getGlobalDescribe().get('HealthcareProvider');
+SObject r = t.newSObject();
+r.put('name', 'Provider 1');
+r.put('AccountId', a.Id);
+r.put('PractitionerId', c.Id);
+r.put('ProviderType', 'Hospital');
+r.put('ProviderClass', 'Medical Group');
+r.put('EffectiveFrom', Date.newInstance(2021, 2, 1));
+r.put('EffectiveTo', Date.newInstance(2034, 2, 27));
+r.put('Status', 'Active');
+r.put('IsActive', true);
+insert r;
+System.debug('HealthcareProvider ok: ' + r.get('Id'));

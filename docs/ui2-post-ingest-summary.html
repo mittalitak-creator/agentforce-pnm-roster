@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UI-2: Post-Ingestion Summary</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/salesforce-lightning-design-system/2.21.4/styles/salesforce-lightning-design-system.min.css">
+<style>
+  body { background: #f3f3f3; font-family: 'Salesforce Sans', Arial, sans-serif; }
+  .agent-wrapper { max-width: 960px; margin: 32px auto; padding: 0 16px; }
+
+  /* Agent chat bubble */
+  .agent-bubble { background: #fff; border: 1px solid #dddbda; border-radius: 8px; padding: 16px 20px; margin-bottom: 12px; }
+  .agent-label { font-size: 11px; font-weight: 700; color: #706e6b; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px; }
+  .agent-text { font-size: 14px; color: #3e3e3c; line-height: 1.6; }
+
+  /* Step progress track */
+  .step-track { display: flex; border-bottom: 1px solid #dddbda; margin-bottom: 16px; }
+  .step-item { flex: 1; text-align: center; padding: 8px 4px; font-size: 11px; font-weight: 700; color: #706e6b; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+  .step-item.is-complete { border-color: #4bca81; color: #027e46; }
+  .step-item.is-current  { border-color: #027e46; color: #027e46; }
+
+  /* Main card */
+  .ui-card { background: #fff; border: 1px solid #dddbda; border-radius: 8px; overflow: hidden; margin-bottom: 12px; box-shadow: 0 2px 3px 0 rgba(0,0,0,.1); }
+  .ui-card-header-success { background: #027e46; color: #fff; padding: 14px 20px; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+  .ui-card-body { padding: 20px; }
+
+  /* Plain-English summary box */
+  .summary-box { background: #f2fbf2; border: 1px solid #4bca81; border-radius: 6px; padding: 16px 20px; margin-bottom: 20px; font-size: 14px; line-height: 1.8; color: #3e3e3c; }
+
+  /* Section label */
+  .section-label { font-size: 11px; font-weight: 700; color: #706e6b; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+
+  /* Stat boxes */
+  .stat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
+  .stat-box { border-radius: 6px; padding: 14px 10px; text-align: center; border: 1px solid #dddbda; }
+  .stat-num { font-size: 26px; font-weight: 700; line-height: 1; display: block; margin-bottom: 4px; }
+  .stat-lbl { font-size: 11px; color: #706e6b; }
+  .stat-success { background: #f2fbf2; border-color: #4bca81; }
+  .stat-success .stat-num { color: #027e46; }
+  .stat-info    { background: #f0f9ff; border-color: #0176d3; }
+  .stat-info    .stat-num { color: #0176d3; }
+  .stat-error   { background: #fff3f3; border-color: #c23934; }
+  .stat-error   .stat-num { color: #c23934; }
+  .stat-warning { background: #fff8ed; border-color: #ffb75d; }
+  .stat-warning .stat-num { color: #9b5e00; }
+  .stat-neutral { background: #fafaf9; }
+  .stat-neutral .stat-num { color: #706e6b; }
+
+  /* Expandable sections */
+  .exp-section { border-bottom: 1px solid #e8e8e8; }
+  .exp-trigger { width: 100%; background: none; border: none; display: flex; align-items: center; justify-content: space-between; padding: 11px 0; cursor: pointer; font-family: inherit; text-align: left; }
+  .exp-trigger:hover { background: #fafaf9; }
+  .exp-trigger-left { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #3e3e3c; }
+  .exp-chevron { font-size: 10px; color: #706e6b; transition: transform .15s; flex-shrink: 0; }
+  .exp-section.is-open .exp-chevron { transform: rotate(90deg); }
+  .exp-content { display: none; padding: 8px 0 12px; }
+  .exp-section.is-open .exp-content { display: block; }
+
+  /* Inline tags */
+  .tag { display: inline-block; border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+  .tag-success { background: #e3f5e3; color: #027e46; }
+  .tag-info    { background: #dff0ff; color: #0176d3; }
+  .tag-error   { background: #fde8e8; color: #c23934; }
+  .tag-warning { background: #fff3cd; color: #9b5e00; }
+
+  /* Data table */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th { background: #f3f3f3; padding: 8px 12px; text-align: left; font-weight: 600; color: #444; border-bottom: 2px solid #dddbda; white-space: nowrap; }
+  .data-table td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; color: #3e3e3c; }
+  .data-table tbody tr:hover { background: #f8f8f8; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table .more-row td { text-align: center; color: #706e6b; background: #fafaf9; }
+
+  /* Skip rows */
+  .skip-item { border-left: 3px solid #dd7a01; padding: 10px 12px; background: #fffaf0; border-radius: 0 4px 4px 0; margin-bottom: 8px; font-size: 13px; }
+  .skip-fix { font-size: 12px; color: #706e6b; margin-top: 4px; }
+
+  /* Audit record block */
+  .audit-block { background: #f0f9ff; border: 1px solid #0176d3; border-radius: 6px; padding: 14px 18px; margin-top: 16px; display: flex; gap: 12px; align-items: flex-start; }
+  .audit-body { flex: 1; }
+  .audit-title { font-size: 14px; font-weight: 700; color: #3e3e3c; margin-bottom: 6px; }
+  .audit-meta { display: flex; flex-wrap: wrap; gap: 12px; }
+  .audit-meta span { font-size: 12px; color: #706e6b; }
+  .audit-meta strong { color: #3e3e3c; }
+
+  /* Timeline */
+  .timeline { border-left: 3px solid #dddbda; padding-left: 16px; margin-top: 8px; }
+  .tl-item { position: relative; margin-bottom: 10px; font-size: 13px; color: #3e3e3c; }
+  .tl-item::before { content: ''; position: absolute; left: -22px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: #4bca81; border: 2px solid #fff; box-shadow: 0 0 0 2px #4bca81; }
+  .tl-time { font-size: 11px; color: #706e6b; margin-left: 6px; }
+
+  /* Card footer */
+  .ui-card-footer { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-top: 1px solid #dddbda; background: #fafaf9; }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: background .12s; font-family: inherit; }
+  .btn:focus { outline: 3px solid #0176d3; outline-offset: 2px; }
+  .btn-brand       { background: #0176d3; color: #fff; border-color: #0176d3; }
+  .btn-brand:hover { background: #014486; }
+  .btn-neutral       { background: #fff; color: #0176d3; border-color: #dddbda; }
+  .btn-neutral:hover { background: #f3f3f3; }
+
+  /* Text link */
+  .text-link { color: #0176d3; text-decoration: underline; cursor: pointer; font-size: 12px; background: none; border: none; padding: 0; font-family: inherit; }
+  .text-link:hover { color: #014486; }
+</style>
+</head>
+<body>
+<div class="agent-wrapper">
+
+  <!-- Page context -->
+  <p style="font-size:11px;font-weight:700;color:#706e6b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">
+    Agentforce &mdash; Provider Roster Management
+  </p>
+
+  <!-- Step progress track -->
+  <div class="step-track" role="list">
+    <div class="step-item is-complete" role="listitem">1 · Upload</div>
+    <div class="step-item is-complete" role="listitem">2 · Stage</div>
+    <div class="step-item is-complete" role="listitem">3 · Map</div>
+    <div class="step-item is-complete" role="listitem">4 · Ingest</div>
+    <div class="step-item is-current"  role="listitem" aria-current="step">✓ 5 · Summary</div>
+  </div>
+
+  <!-- Agent success bubble -->
+  <div class="agent-bubble" style="border-color:#4bca81; background:#f2fbf2;" role="status">
+    <div class="agent-label">🤖 Roster Manager Agent</div>
+    <div class="agent-text">
+      ✅ <strong>Done!</strong> Your Q2 2026 Blue Shield PPO roster has been fully ingested.<br><br>
+      23 providers added &nbsp;·&nbsp; 41 updated &nbsp;·&nbsp; 7 network memberships ended
+      &nbsp;·&nbsp; 5 rows skipped (warnings logged).<br><br>
+      Audit record saved: <strong>ROSTER-2026-0427-001</strong>. Here's the full change summary:
+    </div>
+  </div>
+
+  <!-- ═══ UI-2 Card ═══ -->
+  <div class="ui-card">
+    <div class="ui-card-header-success">
+      ✔ Post-Ingestion Summary — Blue Shield PPO · Q2 2026 Roster
+    </div>
+    <div class="ui-card-body">
+
+      <!-- Plain-English summary -->
+      <div class="summary-box">
+        <strong style="display:block;margin-bottom:6px;font-size:14px;">What Changed</strong>
+        Your Q2 2026 Blue Shield PPO provider roster was processed on
+        <strong>April 27, 2026 at 2:14 PM</strong>.
+        <strong>23 new providers</strong> are now active in the Blue Shield PPO network.
+        <strong>41 existing providers</strong> had their records updated (address, specialty, or tier changes).
+        <strong>7 providers</strong> who were not in the new roster have had their network membership
+        ended effective June 30, 2026.
+        <strong>5 rows</strong> were skipped due to picklist validation warnings — see details below
+        for how to fix these in your next upload.
+        <strong>790 providers</strong> had no changes.
+        This ingestion run has been saved as audit record <strong>ROSTER-2026-0427-001</strong>.
+      </div>
+
+      <!-- Outcome stats -->
+      <div class="stat-grid">
+        <div class="stat-box stat-success">
+          <span class="stat-num">23</span>
+          <span class="stat-lbl">Providers Added</span>
+        </div>
+        <div class="stat-box stat-info">
+          <span class="stat-num">41</span>
+          <span class="stat-lbl">Providers Updated</span>
+        </div>
+        <div class="stat-box stat-error">
+          <span class="stat-num">7</span>
+          <span class="stat-lbl">Memberships Ended</span>
+        </div>
+        <div class="stat-box stat-warning">
+          <span class="stat-num">5</span>
+          <span class="stat-lbl">Rows Skipped</span>
+        </div>
+        <div class="stat-box stat-neutral">
+          <span class="stat-num">790</span>
+          <span class="stat-lbl">No Change</span>
+        </div>
+      </div>
+
+      <!-- Expandable: Added (open by default) -->
+      <div class="exp-section is-open">
+        <button class="exp-trigger" aria-expanded="true" aria-controls="sec-added" onclick="toggleExp(this)">
+          <span class="exp-trigger-left">
+            <span class="tag tag-success">+ 23 Added</span>
+            New providers now active
+          </span>
+          <span class="exp-chevron" aria-hidden="true">▶</span>
+        </button>
+        <div class="exp-content" id="sec-added" role="region">
+          <table class="data-table" role="grid">
+            <thead>
+              <tr>
+                <th scope="col">NPI</th><th scope="col">Name</th><th scope="col">Specialty</th>
+                <th scope="col">Network Tier</th><th scope="col">Effective Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td data-label="NPI">1234567890</td><td data-label="Name">Dr. Maria Santos</td><td data-label="Specialty">Cardiology</td><td>Tier 1</td><td>2026-07-01</td></tr>
+              <tr><td data-label="NPI">9876543210</td><td data-label="Name">Dr. James Okafor</td><td data-label="Specialty">Internal Medicine</td><td>Tier 1</td><td>2026-07-01</td></tr>
+              <tr><td data-label="NPI">1122334455</td><td data-label="Name">Dr. Priya Nair</td><td data-label="Specialty">Pediatrics</td><td>Tier 2</td><td>2026-07-01</td></tr>
+              <tr class="more-row"><td colspan="5">+ 20 more &nbsp;<button class="text-link" onclick="alert('Downloading...')">Download full list (CSV)</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Expandable: Updated -->
+      <div class="exp-section">
+        <button class="exp-trigger" aria-expanded="false" aria-controls="sec-updated" onclick="toggleExp(this)">
+          <span class="exp-trigger-left">
+            <span class="tag tag-info">~ 41 Updated</span>
+            Providers with changes applied
+          </span>
+          <span class="exp-chevron" aria-hidden="true">▶</span>
+        </button>
+        <div class="exp-content" id="sec-updated" role="region">
+          <table class="data-table" role="grid">
+            <thead>
+              <tr><th scope="col">NPI</th><th scope="col">Name</th><th scope="col">Field Updated</th><th scope="col">New Value</th></tr>
+            </thead>
+            <tbody>
+              <tr><td data-label="NPI">5544332211</td><td data-label="Name">Dr. Anna Kim</td><td>Network Tier</td><td>Tier 1</td></tr>
+              <tr><td data-label="NPI">6677889900</td><td data-label="Name">Dr. Robert Chen</td><td>Specialty</td><td>Oncology</td></tr>
+              <tr><td data-label="NPI">3344556677</td><td data-label="Name">West Valley Medical Group</td><td>Address</td><td>456 Elm Ave, Sacramento CA</td></tr>
+              <tr class="more-row"><td colspan="4">+ 38 more &nbsp;<button class="text-link" onclick="alert('Downloading...')">Download full list (CSV)</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Expandable: Network Ended -->
+      <div class="exp-section">
+        <button class="exp-trigger" aria-expanded="false" aria-controls="sec-ended" onclick="toggleExp(this)">
+          <span class="exp-trigger-left">
+            <span class="tag tag-error">− 7 Ended</span>
+            Network memberships ended
+          </span>
+          <span class="exp-chevron" aria-hidden="true">▶</span>
+        </button>
+        <div class="exp-content" id="sec-ended" role="region">
+          <table class="data-table" role="grid">
+            <thead>
+              <tr><th scope="col">NPI</th><th scope="col">Name</th><th scope="col">End Date Applied</th></tr>
+            </thead>
+            <tbody>
+              <tr><td data-label="NPI">1010101010</td><td data-label="Name">Dr. Frank Torres</td><td>2026-06-30</td></tr>
+              <tr><td data-label="NPI">2020202020</td><td data-label="Name">Sunrise Family Clinic</td><td>2026-06-30</td></tr>
+              <tr class="more-row"><td colspan="3">+ 5 more &nbsp;<button class="text-link" onclick="alert('Downloading...')">Download full list (CSV)</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Expandable: Skipped rows -->
+      <div class="exp-section">
+        <button class="exp-trigger" aria-expanded="false" aria-controls="sec-skipped" onclick="toggleExp(this)">
+          <span class="exp-trigger-left">
+            <span class="tag tag-warning">⚠ 5 Skipped</span>
+            Rows not ingested — fix for next upload
+          </span>
+          <span class="exp-chevron" aria-hidden="true">▶</span>
+        </button>
+        <div class="exp-content" id="sec-skipped" role="region">
+          <div class="skip-item">
+            <strong>Rows 34, 67 — Picklist value not allowed</strong>
+            <div class="skip-fix">Column <code>ProviderClass</code>: value "Resident" is not configured in this org. Valid values: Physician, Nurse Practitioner, Physician Assistant, Specialist, Hospital, Group Practice.</div>
+            <div class="skip-fix">🔧 <strong>How to fix:</strong> Update rows 34 and 67, column <code>ProviderClass</code> to a valid picklist value, then re-upload.</div>
+          </div>
+          <div class="skip-item">
+            <strong>Rows 14, 27, 45 — Invalid NPI</strong>
+            <div class="skip-fix">Column <code>ProviderNpi</code>: values have fewer than 10 digits or fail Luhn check digit validation.</div>
+            <div class="skip-fix">🔧 <strong>How to fix:</strong> Verify the NPI for each provider with your source data and correct before re-uploading.</div>
+          </div>
+          <div style="margin-top:8px;">
+            <button class="text-link" onclick="alert('Downloading...')">⬇ Download skipped rows with fix instructions</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audit record block -->
+      <div class="audit-block">
+        <div style="font-size:22px;color:#0176d3;flex-shrink:0;">📄</div>
+        <div class="audit-body">
+          <div class="audit-title">Audit Record: ROSTER-2026-0427-001</div>
+          <div class="audit-meta">
+            <span>Reference ID: <strong>a0X4W000001XXXX</strong></span>
+            <span>Case: <strong>00001234</strong></span>
+            <span>Uploaded by: <strong>Maria Lopez</strong></span>
+            <span>Job ID: <strong>7074W000001YYYY</strong></span>
+            <span>Started: <strong>2:08 PM</strong></span>
+            <span>Completed: <strong>2:14 PM</strong></span>
+            <span>Duration: <strong>5 min 42 sec</strong></span>
+          </div>
+        </div>
+        <div style="flex-shrink:0;">
+          <button class="btn btn-neutral" onclick="alert('Opening audit record...')">View Record</button>
+        </div>
+      </div>
+
+      <!-- Processing timeline -->
+      <div style="margin-top:20px;">
+        <div class="section-label">Processing Timeline</div>
+        <div class="timeline">
+          <div class="tl-item"><strong>File received via Email-to-Case</strong><span class="tl-time">April 27, 2026 · 2:04 PM</span></div>
+          <div class="tl-item"><strong>Pre-validation complete</strong> — 861 valid rows, 5 skipped<span class="tl-time">2:06 PM</span></div>
+          <div class="tl-item"><strong>Staging complete</strong> — Target DLO created<span class="tl-time">2:07 PM</span></div>
+          <div class="tl-item"><strong>Field mapping confirmed</strong> — DPE Gen AI mapping approved<span class="tl-time">2:08 PM</span></div>
+          <div class="tl-item"><strong>DPE ingestion started</strong> — 3-level chain running<span class="tl-time">2:08 PM</span></div>
+          <div class="tl-item"><strong>DPE ingestion complete</strong> — all records written<span class="tl-time">2:14 PM</span></div>
+          <div class="tl-item"><strong>Audit record created</strong> — ROSTER-2026-0427-001<span class="tl-time">2:14 PM</span></div>
+        </div>
+      </div>
+
+    </div><!-- /ui-card-body -->
+
+    <div class="ui-card-footer">
+      <button class="btn btn-neutral" onclick="alert('Downloading full audit report...')">⬇ Download Full Audit Report</button>
+      <button class="btn btn-neutral" onclick="alert('Opening Case 00001234...')">📁 View Case 00001234</button>
+      <button class="btn btn-brand" onclick="alert('Starting new roster upload session...')">Upload Another Roster ›</button>
+    </div>
+  </div><!-- /ui-card -->
+
+  <!-- Agent follow-up bubble -->
+  <div class="agent-bubble">
+    <div class="agent-label">🤖 Roster Manager Agent</div>
+    <div class="agent-text">
+      Is there anything else you'd like me to do? For example:
+      <ul style="margin-top:8px;padding-left:20px;line-height:2.2;">
+        <li>Upload a roster for another network</li>
+        <li>Show me all roster runs from this month</li>
+        <li>What CareSpecialty records exist in the org?</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /agent-wrapper -->
+
+<script>
+  function toggleExp(btn) {
+    const section = btn.closest('.exp-section');
+    const isOpen = section.classList.toggle('is-open');
+    btn.setAttribute('aria-expanded', String(isOpen));
+  }
+</script>
+</body>
+</html>

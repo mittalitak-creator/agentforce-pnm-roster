@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Created_Case__c</fullName>
+    <label>Created Case</label>
+    <type>Lookup</type>
+    <required>false</required>
+    <referenceTo>Case</referenceTo>
+    <relationshipLabel>Intake Checklists</relationshipLabel>
+    <relationshipName>Intake_Checklists</relationshipName>
+</CustomField>
+

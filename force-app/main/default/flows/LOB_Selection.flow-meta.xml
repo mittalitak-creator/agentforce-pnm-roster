@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>61.0</apiVersion>
+    <description>Screen flow to select Line of Business with dropdown</description>
+    <interviewLabel>LOB Selection {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>LOB Selection</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>Flow</processType>
+    <screens>
+        <name>LOB_Selection_Screen</name>
+        <label>LOB Selection Screen</label>
+        <locationX>176</locationX>
+        <locationY>134</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Set_Output_Variable</targetReference>
+        </connector>
+        <fields>
+            <name>LOB_Picklist</name>
+            <dataType>String</dataType>
+            <fieldText>What is the Line of Business for this member?</fieldText>
+            <fieldType>DropdownBox</fieldType>
+            <isRequired>true</isRequired>
+            <choiceReferences>Medicare_Advantage</choiceReferences>
+            <choiceReferences>Part_D</choiceReferences>
+            <choiceReferences>Commercial</choiceReferences>
+            <choiceReferences>Medicaid</choiceReferences>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>false</showHeader>
+    </screens>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>LOB_Selection_Screen</targetReference>
+        </connector>
+    </start>
+    <status>Active</status>
+    <variables>
+        <name>selectedLOB</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+    </variables>
+    <choices>
+        <name>Medicare_Advantage</name>
+        <choiceText>Medicare Advantage</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Medicare Advantage</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Part_D</name>
+        <choiceText>Part D</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Part D</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Commercial</name>
+        <choiceText>Commercial</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Commercial</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Medicaid</name>
+        <choiceText>Medicaid</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Medicaid</stringValue>
+        </value>
+    </choices>
+    <assignments>
+        <name>Set_Output_Variable</name>
+        <label>Set Output Variable</label>
+        <locationX>176</locationX>
+        <locationY>242</locationY>
+        <assignmentItems>
+            <assignToReference>selectedLOB</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>LOB_Picklist</elementReference>
+            </value>
+        </assignmentItems>
+    </assignments>
+</Flow>

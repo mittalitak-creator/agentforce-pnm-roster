@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>61.0</apiVersion>
+    <description>Screen flow to select urgency with dropdown</description>
+    <interviewLabel>Urgency Selection {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Urgency Selection</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>Flow</processType>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Urgency_Selection_Screen</targetReference>
+        </connector>
+    </start>
+    <status>Active</status>
+    <screens>
+        <name>Urgency_Selection_Screen</name>
+        <label>Urgency Selection Screen</label>
+        <locationX>176</locationX>
+        <locationY>134</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Set_Output_Variable</targetReference>
+        </connector>
+        <fields>
+            <name>Urgency_Picklist</name>
+            <dataType>String</dataType>
+            <fieldText>Is this an urgent/expedited request?</fieldText>
+            <fieldType>DropdownBox</fieldType>
+            <isRequired>true</isRequired>
+            <choiceReferences>Urgent_Choice</choiceReferences>
+            <choiceReferences>Standard_Choice</choiceReferences>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>false</showHeader>
+    </screens>
+    <variables>
+        <name>urgencyText</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+    </variables>
+    <choices>
+        <name>Urgent_Choice</name>
+        <choiceText>Yes - This is urgent</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Yes - This is urgent</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Standard_Choice</name>
+        <choiceText>No - Standard processing</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>No - Standard processing</stringValue>
+        </value>
+    </choices>
+    <assignments>
+        <name>Set_Output_Variable</name>
+        <label>Set Output Variable</label>
+        <locationX>176</locationX>
+        <locationY>242</locationY>
+        <assignmentItems>
+            <assignToReference>urgencyText</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Urgency_Picklist</elementReference>
+            </value>
+        </assignmentItems>
+    </assignments>
+</Flow>

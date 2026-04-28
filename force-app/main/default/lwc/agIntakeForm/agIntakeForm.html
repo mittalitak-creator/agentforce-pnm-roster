@@ -1,0 +1,256 @@
+<template>
+    <lightning-card title="Appeals & Grievances Intake" icon-name="standard:case">
+        
+        <!-- Progress Bar -->
+        <div class="slds-m-around_medium">
+            <lightning-progress-indicator current-step={currentStep} type="path" variant="base">
+                <lightning-progress-step label="Member Search" value="1"></lightning-progress-step>
+                <lightning-progress-step label="Case Type" value="2"></lightning-progress-step>
+                <lightning-progress-step label="Details" value="3"></lightning-progress-step>
+                <lightning-progress-step label="Complete" value="4"></lightning-progress-step>
+            </lightning-progress-indicator>
+            
+            <!-- Progress Percentage -->
+            <div class="slds-m-top_small">
+                <lightning-formatted-text value={progressPercentage}></lightning-formatted-text>% Complete
+            </div>
+        </div>
+        
+        <!-- Step 1: Member Search -->
+        <template if:true={isStep1}>
+            <div class="slds-m-around_medium">
+                <h2 class="slds-text-heading_medium slds-m-bottom_medium">Step 1: Identify Member</h2>
+                
+                <lightning-layout multiple-rows>
+                    <lightning-layout-item size="12">
+                        <p class="slds-m-bottom_medium">Search by Member ID OR by Name and Date of Birth:</p>
+                    </lightning-layout-item>
+                    
+                    <lightning-layout-item size="12" padding="around-small">
+                        <lightning-input
+                            type="text"
+                            label="Member ID"
+                            data-field="memberId"
+                            value={formData.memberId}
+                            onchange={handleInputChange}
+                            placeholder="e.g., MEM-001">
+                        </lightning-input>
+                    </lightning-layout-item>
+                    
+                    <lightning-layout-item size="12" padding="around-small">
+                        <div class="slds-text-align_center slds-m-vertical_small">
+                            <strong>- OR -</strong>
+                        </div>
+                    </lightning-layout-item>
+                    
+                    <lightning-layout-item size="6" padding="around-small">
+                        <lightning-input
+                            type="text"
+                            label="First Name"
+                            data-field="firstName"
+                            value={formData.firstName}
+                            onchange={handleInputChange}>
+                        </lightning-input>
+                    </lightning-layout-item>
+                    
+                    <lightning-layout-item size="6" padding="around-small">
+                        <lightning-input
+                            type="text"
+                            label="Last Name"
+                            data-field="lastName"
+                            value={formData.lastName}
+                            onchange={handleInputChange}>
+                        </lightning-input>
+                    </lightning-layout-item>
+                    
+                    <lightning-layout-item size="6" padding="around-small">
+                        <lightning-input
+                            type="date"
+                            label="Date of Birth"
+                            data-field="dateOfBirth"
+                            value={formData.dateOfBirth}
+                            onchange={handleInputChange}>
+                        </lightning-input>
+                    </lightning-layout-item>
+                    
+                    <lightning-layout-item size="12" padding="around-small">
+                        <lightning-button
+                            variant="brand"
+                            label="Search Member"
+                            onclick={handleSearchMember}
+                            class="slds-m-top_medium">
+                        </lightning-button>
+                    </lightning-layout-item>
+                    
+                    <!-- Member Found -->
+                    <template if:true={showMemberResults}>
+                        <lightning-layout-item size="12" padding="around-small">
+                            <div class="slds-box slds-theme_success slds-m-top_medium">
+                                <p class="slds-text-heading_small">✓ Member Found</p>
+                                <p><strong>Name:</strong> {memberName}</p>
+                                <p><strong>Member ID:</strong> {memberId}</p>
+                            </div>
+                        </lightning-layout-item>
+                    </template>
+                    
+                    <!-- Member Not Found -->
+                    <template if:true={memberNotFound}>
+                        <lightning-layout-item size="12" padding="around-small">
+                            <div class="slds-box slds-theme_error slds-m-top_medium">
+                                <p>No member found with the provided information. Please verify and try again.</p>
+                            </div>
+                        </lightning-layout-item>
+                    </template>
+                    
+                    <!-- Multiple Members -->
+                    <template if:true={multipleMembers}>
+                        <lightning-layout-item size="12" padding="around-small">
+                            <div class="slds-box slds-theme_warning slds-m-top_medium">
+                                <p>Multiple members found. Please provide more specific information.</p>
+                            </div>
+                        </lightning-layout-item>
+                    </template>
+                </lightning-layout>
+            </div>
+        </template>
+        
+        <!-- Step 2: Case Type Selection -->
+        <template if:true={isStep2}>
+            <div class="slds-m-around_medium">
+                <h2 class="slds-text-heading_medium slds-m-bottom_medium">Step 2: Select Case Type</h2>
+                
+                <lightning-layout multiple-rows>
+                    <lightning-layout-item size="12" padding="around-small">
+                        <lightning-radio-group
+                            name="caseType"
+                            label="What type of case is this?"
+                            options={caseTypeOptions}
+                            value={formData.caseType}
+                            data-field="caseType"
+                            onchange={handleInputChange}
+                            type="button">
+                        </lightning-radio-group>
+                    </lightning-layout-item>
+                    
+                    <lightning-layout-item size="12" padding="around-small">
+                        <div class="slds-box slds-theme_info slds-m-top_medium">
+                            <p class="slds-text-heading_small">Definitions:</p>
+                            <ul class="slds-list_dotted">
+                                <li><strong>Appeal:</strong> Deals with the review of adverse initial determinations (claim adjudication, PA, coverage determination) made by the plan</li>
+                                <li><strong>Grievance:</strong> An expression of dissatisfaction with any aspect of the operations, activities or behavior of a plan</li>
+                                <li><strong>Dispute:</strong> Disagreement regarding coverage or billing</li>
+                            </ul>
+                        </div>
+                    </lightning-layout-item>
+                </lightning-layout>
+            </div>
+        </template>
+        
+        <!-- Step 3: Complaint Details -->
+        <template if:true={isStep3}>
+            <div class="slds-m-around_medium">
+                <h2 class="slds-text-heading_medium slds-m-bottom_medium">Step 3: Complaint Details</h2>
+                
+                <lightning-layout multiple-rows>
+                    <lightning-layout-item size="12" padding="around-small">
+                        <lightning-combobox
+                            label="Category"
+                            value={formData.category}
+                            placeholder="Select a category"
+                            options={categoryOptions}
+                            data-field="category"
+                            onchange={handleInputChange}
+                            required>
+                        </lightning-combobox>
+                    </lightning-layout-item>
+                    
+                    <lightning-layout-item size="12" padding="around-small">
+                        <lightning-input
+                            type="text"
+                            label="Sub-Category (Optional)"
+                            data-field="subCategory"
+                            value={formData.subCategory}
+                            onchange={handleInputChange}>
+                        </lightning-input>
+                    </lightning-layout-item>
+                    
+                    <lightning-layout-item size="12" padding="around-small">
+                        <lightning-textarea
+                            label="Member Narrative"
+                            data-field="narrative"
+                            value={formData.narrative}
+                            onchange={handleInputChange}
+                            placeholder="Please describe the issue in the member's own words..."
+                            rows="5"
+                            required>
+                        </lightning-textarea>
+                    </lightning-layout-item>
+                </lightning-layout>
+            </div>
+        </template>
+        
+        <!-- Step 4: Complete -->
+        <template if:true={isStep4}>
+            <div class="slds-m-around_medium">
+                <div class="slds-box slds-theme_success">
+                    <h2 class="slds-text-heading_medium slds-m-bottom_medium">✓ Intake Complete!</h2>
+                    
+                    <p class="slds-m-bottom_small"><strong>Progress:</strong> {progressPercentage}% Complete</p>
+                    
+                    <div class="slds-m-vertical_medium">
+                        <p class="slds-text-heading_small">Tasks Completed:</p>
+                        <ul class="slds-list_dotted">
+                            <template for:each={tasksCompleted} for:item="task">
+                                <li key={task}>{task}</li>
+                            </template>
+                        </ul>
+                    </div>
+                    
+                    <div class="slds-m-vertical_medium">
+                        <p class="slds-text-heading_small">Summary:</p>
+                        <p><strong>Member:</strong> {memberName}</p>
+                        <p><strong>Case Type:</strong> {formData.caseType}</p>
+                        <p><strong>Category:</strong> {formData.category}</p>
+                        <template if:true={formData.subCategory}>
+                            <p><strong>Sub-Category:</strong> {formData.subCategory}</p>
+                        </template>
+                    </div>
+                    
+                    <lightning-button
+                        variant="brand"
+                        label="Start New Intake"
+                        onclick={handleStartNew}
+                        class="slds-m-top_medium">
+                    </lightning-button>
+                </div>
+            </div>
+        </template>
+        
+        <!-- Navigation Buttons -->
+        <div slot="footer" class="slds-clearfix">
+            <lightning-button
+                if:true={showPrevious}
+                label="Previous"
+                onclick={handlePrevious}
+                class="slds-float_left">
+            </lightning-button>
+            
+            <lightning-button
+                if:true={showNext}
+                variant="brand"
+                label="Next"
+                onclick={handleNext}
+                class="slds-float_right">
+            </lightning-button>
+            
+            <lightning-button
+                if:true={showSubmit}
+                variant="success"
+                label="Submit Intake"
+                onclick={handleSubmit}
+                class="slds-float_right">
+            </lightning-button>
+        </div>
+        
+    </lightning-card>
+</template>

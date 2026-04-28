@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QuickAction xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Launch A&amp;G Case Intake Flow</description>
+    <flowDefinition>AG_Case_Intake_Flow</flowDefinition>
+    <label>New A&amp;G Intake</label>
+    <optionsCreateFeedItem>false</optionsCreateFeedItem>
+    <type>Flow</type>
+</QuickAction>
+

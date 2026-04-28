@@ -1,0 +1,76 @@
+<template>
+    <lightning-card title="Appeals & Grievances Type Selection" icon-name="standard:case">
+        <div class="slds-card__body slds-card__body_inner">
+            
+            <!-- Instruction Text -->
+            <div class="slds-m-bottom_medium">
+                <p class="slds-text-heading_small slds-m-bottom_small">
+                    Let me help you determine the type of case:
+                </p>
+            </div>
+
+            <!-- Type Options -->
+            <div class="slds-grid slds-wrap slds-gutters">
+                
+                <!-- Appeal Option -->
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_medium">
+                    <div class={appealCardClass} 
+                         data-value="Appeal"
+                         onclick={handleTypeSelect}
+                         role="button"
+                         tabindex="0">
+                        <div class="slds-p-around_medium">
+                            <div class="slds-text-heading_medium slds-m-bottom_x-small">
+                                <lightning-icon icon-name="standard:approval" 
+                                              size="small" 
+                                              class="slds-m-right_x-small"></lightning-icon>
+                                Appeal
+                            </div>
+                            <p class="slds-text-body_regular slds-m-bottom_x-small">
+                                A request to review a decision about coverage, payment, or services.
+                            </p>
+                            <p class="slds-text-color_weak slds-text-body_small">
+                                Examples: Denied claim, prior authorization denial, formulary exception
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grievance Option -->
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_medium">
+                    <div class={grievanceCardClass}
+                         data-value="Grievance"
+                         onclick={handleTypeSelect}
+                         role="button"
+                         tabindex="0">
+                        <div class="slds-p-around_medium">
+                            <div class="slds-text-heading_medium slds-m-bottom_x-small">
+                                <lightning-icon icon-name="standard:case_comment" 
+                                              size="small" 
+                                              class="slds-m-right_x-small"></lightning-icon>
+                                Grievance
+                            </div>
+                            <p class="slds-text-body_regular slds-m-bottom_x-small">
+                                A complaint about service quality, access to care, or provider behavior.
+                            </p>
+                            <p class="slds-text-color_weak slds-text-body_small">
+                                Examples: Wait times, staff behavior, billing issues, quality of care concerns
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Selected Type Display -->
+            <template if:true={selectedType}>
+                <div class="slds-box slds-theme_success slds-m-top_medium">
+                    <p class="slds-text-heading_small">
+                        ✓ Selected: <strong>{selectedType}</strong>
+                    </p>
+                </div>
+            </template>
+
+        </div>
+    </lightning-card>
+</template>

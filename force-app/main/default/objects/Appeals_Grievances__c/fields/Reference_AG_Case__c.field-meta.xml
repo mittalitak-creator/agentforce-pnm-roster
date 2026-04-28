@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Reference_AG_Case__c</fullName>
+    <label>Reference A&amp;G Case</label>
+    <type>Lookup</type>
+    <referenceTo>Case</referenceTo>
+    <relationshipLabel>Reference Appeals &amp; Grievances</relationshipLabel>
+    <relationshipName>Reference_Appeals_Grievances</relationshipName>
+    <required>false</required>
+    <deleteConstraint>SetNull</deleteConstraint>
+</CustomField>
+

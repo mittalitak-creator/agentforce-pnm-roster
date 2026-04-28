@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UI-1: Post-Staging Confirmation</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/salesforce-lightning-design-system/2.21.4/styles/salesforce-lightning-design-system.min.css">
+<style>
+  body { background: #f3f3f3; font-family: 'Salesforce Sans', Arial, sans-serif; }
+  .agent-wrapper { max-width: 960px; margin: 32px auto; padding: 0 16px; }
+
+  /* Agent chat bubble */
+  .agent-bubble { background: #fff; border: 1px solid #dddbda; border-radius: 8px; padding: 16px 20px; margin-bottom: 12px; }
+  .agent-label { font-size: 11px; font-weight: 700; color: #706e6b; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px; }
+  .agent-text { font-size: 14px; color: #3e3e3c; line-height: 1.6; }
+
+  /* Step progress track */
+  .step-track { display: flex; border-bottom: 1px solid #dddbda; margin-bottom: 16px; }
+  .step-item { flex: 1; text-align: center; padding: 8px 4px; font-size: 11px; font-weight: 700; color: #706e6b; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+  .step-item.is-complete { border-color: #4bca81; color: #027e46; }
+  .step-item.is-current  { border-color: #0176d3; color: #0176d3; }
+  .step-item.is-pending  { color: #c9c7c5; }
+
+  /* Main card */
+  .ui-card { background: #fff; border: 1px solid #dddbda; border-radius: 8px; overflow: hidden; margin-bottom: 12px; box-shadow: 0 2px 3px 0 rgba(0,0,0,.1); }
+  .ui-card-header { background: #0176d3; color: #fff; padding: 14px 20px; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+  .ui-card-body { padding: 20px; }
+
+  /* Section label */
+  .section-label { font-size: 11px; font-weight: 700; color: #706e6b; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+
+  /* Validation summary pills */
+  .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; align-items: center; }
+  .pill { display: inline-flex; align-items: center; gap: 5px; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600; }
+  .pill-pass   { background: #e3f5e3; color: #027e46; }
+  .pill-warn   { background: #fff3cd; color: #9b5e00; }
+  .pill-error  { background: #fde8e8; color: #c23934; }
+  .pill-neutral{ background: #f3f3f3; color: #706e6b; }
+
+  /* Stat boxes */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-box { border-radius: 6px; padding: 16px 12px; text-align: center; border: 1px solid #dddbda; }
+  .stat-num { font-size: 28px; font-weight: 700; line-height: 1; display: block; margin-bottom: 4px; }
+  .stat-lbl { font-size: 12px; color: #706e6b; }
+  .stat-success { background: #f2fbf2; border-color: #4bca81; }
+  .stat-success .stat-num { color: #027e46; }
+  .stat-info    { background: #f0f9ff; border-color: #0176d3; }
+  .stat-info    .stat-num { color: #0176d3; }
+  .stat-error   { background: #fff3f3; border-color: #c23934; }
+  .stat-error   .stat-num { color: #c23934; }
+  .stat-neutral { background: #fafaf9; }
+  .stat-neutral .stat-num { color: #706e6b; }
+
+  /* Expandable sections */
+  .exp-section { border-bottom: 1px solid #e8e8e8; }
+  .exp-trigger { width: 100%; background: none; border: none; display: flex; align-items: center; justify-content: space-between; padding: 11px 0; cursor: pointer; font-family: inherit; text-align: left; }
+  .exp-trigger:hover { background: #fafaf9; }
+  .exp-trigger-left { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #3e3e3c; }
+  .exp-chevron { font-size: 10px; color: #706e6b; transition: transform .15s; flex-shrink: 0; }
+  .exp-section.is-open .exp-chevron { transform: rotate(90deg); }
+  .exp-content { display: none; padding: 8px 0 12px; }
+  .exp-section.is-open .exp-content { display: block; }
+
+  /* Inline badges */
+  .tag { display: inline-block; border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+  .tag-success { background: #e3f5e3; color: #027e46; }
+  .tag-info    { background: #dff0ff; color: #0176d3; }
+  .tag-error   { background: #fde8e8; color: #c23934; }
+  .tag-warning { background: #fff3cd; color: #9b5e00; }
+
+  /* Data table */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th { background: #f3f3f3; padding: 8px 12px; text-align: left; font-weight: 600; color: #444; border-bottom: 2px solid #dddbda; white-space: nowrap; }
+  .data-table td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; color: #3e3e3c; }
+  .data-table tbody tr:hover { background: #f8f8f8; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table .more-row td { text-align: center; color: #706e6b; background: #fafaf9; }
+
+  /* Diff values */
+  .val-old { color: #c23934; text-decoration: line-through; font-size: 12px; }
+  .val-new { color: #027e46; font-weight: 700; font-size: 12px; }
+  .diff-arrow { color: #706e6b; margin: 0 4px; }
+
+  /* Alert banners */
+  .alert { border-radius: 6px; padding: 12px 16px; margin-top: 16px; display: flex; gap: 10px; align-items: flex-start; font-size: 13px; line-height: 1.5; }
+  .alert-warning { background: #fff8ed; border: 1px solid #ffb75d; }
+  .alert-error   { background: #fff3f3; border: 1px solid #c23934; }
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .alert-warning .alert-icon { color: #dd7a01; }
+  .alert-error   .alert-icon { color: #c23934; }
+
+  /* Card footer */
+  .ui-card-footer { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-top: 1px solid #dddbda; background: #fafaf9; }
+  .footer-left { display: flex; gap: 10px; }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: background .12s, box-shadow .12s; font-family: inherit; }
+  .btn:focus { outline: 3px solid #0176d3; outline-offset: 2px; }
+  .btn-brand       { background: #0176d3; color: #fff; border-color: #0176d3; }
+  .btn-brand:hover { background: #014486; }
+  .btn-neutral       { background: #fff; color: #0176d3; border-color: #dddbda; }
+  .btn-neutral:hover { background: #f3f3f3; }
+  .btn-destructive       { background: #fff; color: #c23934; border-color: #c23934; }
+  .btn-destructive:hover { background: #fff3f3; }
+
+  /* Text link */
+  .text-link { color: #0176d3; text-decoration: underline; cursor: pointer; font-size: 12px; background: none; border: none; padding: 0; font-family: inherit; }
+  .text-link:hover { color: #014486; }
+</style>
+</head>
+<body>
+<div class="agent-wrapper">
+
+  <!-- Page context -->
+  <p style="font-size:11px;font-weight:700;color:#706e6b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">
+    Agentforce &mdash; Provider Roster Management
+  </p>
+
+  <!-- Step progress track -->
+  <div class="step-track" role="list">
+    <div class="step-item is-complete" role="listitem">1 · Upload</div>
+    <div class="step-item is-complete" role="listitem">2 · Stage</div>
+    <div class="step-item is-current"  role="listitem" aria-current="step">● Confirm</div>
+    <div class="step-item is-pending"  role="listitem">3 · Map</div>
+    <div class="step-item is-pending"  role="listitem">4 · Ingest</div>
+    <div class="step-item is-pending"  role="listitem">5 · Summary</div>
+  </div>
+
+  <!-- Agent narration bubble -->
+  <div class="agent-bubble">
+    <div class="agent-label">🤖 Roster Manager Agent</div>
+    <div class="agent-text">
+      Staging complete for <strong>provider_roster_Q2_2026.csv</strong>
+      (861 valid rows · 3 errors skipped · 2 warnings).
+      The Target DLO has been created from the Canonical DLO template.<br><br>
+      Below is a full breakdown of what will change in your <strong>Blue Shield PPO</strong>
+      network. Please review and confirm before I proceed to field mapping.
+    </div>
+  </div>
+
+  <!-- ═══ UI-1 Card ═══ -->
+  <div class="ui-card">
+    <div class="ui-card-header">
+      📋 Post-Staging Confirmation — Blue Shield PPO · Q2 2026 Roster
+    </div>
+    <div class="ui-card-body">
+
+      <!-- Pre-Validation Summary -->
+      <div class="section-label">Pre-Validation Summary</div>
+      <div class="pill-row">
+        <span class="pill pill-pass">✓ 11 rules passed</span>
+        <span class="pill pill-warn">⚠ 2 warnings — rows 34, 67 (picklist)</span>
+        <span class="pill pill-error">✗ 3 errors — rows 14, 27, 45 (invalid NPI)</span>
+        <span class="pill pill-neutral">⊘ 5 rows skipped</span>
+        <button class="text-link" onclick="alert('Downloading error report...')">⬇ Download error report</button>
+      </div>
+
+      <!-- Proposed Changes -->
+      <div class="section-label">Proposed Changes</div>
+      <div class="stat-grid">
+        <div class="stat-box stat-success">
+          <span class="stat-num">23</span>
+          <span class="stat-lbl">New Providers</span>
+        </div>
+        <div class="stat-box stat-info">
+          <span class="stat-num">41</span>
+          <span class="stat-lbl">Updated</span>
+        </div>
+        <div class="stat-box stat-error">
+          <span class="stat-num">7</span>
+          <span class="stat-lbl">Network Ended</span>
+        </div>
+        <div class="stat-box stat-neutral">
+          <span class="stat-num">790</span>
+          <span class="stat-lbl">No Change</span>
+        </div>
+      </div>
+
+      <!-- Expandable: New Providers (open by default) -->
+      <div class="exp-section is-open">
+        <button class="exp-trigger" aria-expanded="true" aria-controls="sec-new" onclick="toggleExp(this)">
+          <span class="exp-trigger-left">
+            <span class="tag tag-success">+ 23 New</span>
+            New Providers to be added
+          </span>
+          <span class="exp-chevron" aria-hidden="true">▶</span>
+        </button>
+        <div class="exp-content" id="sec-new" role="region">
+          <table class="data-table" role="grid">
+            <thead>
+              <tr>
+                <th scope="col">NPI</th>
+                <th scope="col">Name</th>
+                <th scope="col">Specialty</th>
+                <th scope="col">Network Tier</th>
+                <th scope="col">Effective Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td data-label="NPI">1234567890</td><td data-label="Name">Dr. Maria Santos</td><td data-label="Specialty">Cardiology</td><td data-label="Tier">Tier 1</td><td data-label="Effective">2026-07-01</td></tr>
+              <tr><td data-label="NPI">9876543210</td><td data-label="Name">Dr. James Okafor</td><td data-label="Specialty">Internal Medicine</td><td data-label="Tier">Tier 1</td><td data-label="Effective">2026-07-01</td></tr>
+              <tr><td data-label="NPI">1122334455</td><td data-label="Name">Dr. Priya Nair</td><td data-label="Specialty">Pediatrics</td><td data-label="Tier">Tier 2</td><td data-label="Effective">2026-07-01</td></tr>
+              <tr class="more-row"><td colspan="5">+ 20 more &nbsp;<button class="text-link" onclick="alert('Downloading...')">Download full list (CSV)</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Expandable: Updated -->
+      <div class="exp-section">
+        <button class="exp-trigger" aria-expanded="false" aria-controls="sec-updated" onclick="toggleExp(this)">
+          <span class="exp-trigger-left">
+            <span class="tag tag-info">~ 41 Updated</span>
+            Providers with field changes
+          </span>
+          <span class="exp-chevron" aria-hidden="true">▶</span>
+        </button>
+        <div class="exp-content" id="sec-updated" role="region">
+          <table class="data-table" role="grid">
+            <thead>
+              <tr>
+                <th scope="col">NPI</th><th scope="col">Name</th><th scope="col">Field</th><th scope="col">Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-label="NPI">5544332211</td><td data-label="Name">Dr. Anna Kim</td><td data-label="Field">Network Tier</td>
+                <td data-label="Change">
+                  <span class="val-old">Tier 2</span><span class="diff-arrow">→</span><span class="val-new">Tier 1</span>
+                  &nbsp;<span class="tag tag-warning" style="font-size:10px;">⚠ Tier change</span>
+                </td>
+              </tr>
+              <tr>
+                <td data-label="NPI">6677889900</td><td data-label="Name">Dr. Robert Chen</td><td data-label="Field">Specialty</td>
+                <td data-label="Change">
+                  <span class="val-old">Pediatrics</span><span class="diff-arrow">→</span><span class="val-new">Oncology</span>
+                  &nbsp;<span class="tag tag-warning" style="font-size:10px;">⚠ Significant change</span>
+                </td>
+              </tr>
+              <tr>
+                <td data-label="NPI">3344556677</td><td data-label="Name">West Valley Medical Group</td><td data-label="Field">Address</td>
+                <td data-label="Change">
+                  <span class="val-old">123 Oak St, Sacramento CA</span><span class="diff-arrow">→</span><span class="val-new">456 Elm Ave, Sacramento CA</span>
+                </td>
+              </tr>
+              <tr class="more-row"><td colspan="4">+ 38 more &nbsp;<button class="text-link" onclick="alert('Downloading...')">Download full list (CSV)</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Expandable: Network Ended -->
+      <div class="exp-section">
+        <button class="exp-trigger" aria-expanded="false" aria-controls="sec-ended" onclick="toggleExp(this)">
+          <span class="exp-trigger-left">
+            <span class="tag tag-error">− 7 Ended</span>
+            Providers to be removed from network
+          </span>
+          <span class="exp-chevron" aria-hidden="true">▶</span>
+        </button>
+        <div class="exp-content" id="sec-ended" role="region">
+          <table class="data-table" role="grid">
+            <thead>
+              <tr><th scope="col">NPI</th><th scope="col">Name</th><th scope="col">Current Status</th><th scope="col">Action</th></tr>
+            </thead>
+            <tbody>
+              <tr><td data-label="NPI">1010101010</td><td data-label="Name">Dr. Frank Torres</td><td data-label="Status">Active</td><td data-label="Action"><span class="tag tag-error">End date: 2026-06-30</span></td></tr>
+              <tr><td data-label="NPI">2020202020</td><td data-label="Name">Sunrise Family Clinic</td><td data-label="Status">Active</td><td data-label="Action"><span class="tag tag-error">End date: 2026-06-30</span></td></tr>
+              <tr class="more-row"><td colspan="4">+ 5 more &nbsp;<button class="text-link" onclick="alert('Downloading...')">Download full list (CSV)</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Warning: rows skipped -->
+      <div class="alert alert-warning" role="alert">
+        <span class="alert-icon">⚠</span>
+        <div>
+          <strong>2 rows will be skipped during ingest</strong> — picklist value "Resident" not
+          configured for <code>ProviderClass</code> (rows 34, 67). These providers will not be added.
+          <br>
+          <button class="text-link" style="margin-top:4px;" onclick="alert('Downloading...')">⬇ Download full error report</button>
+        </div>
+      </div>
+
+      <!-- Warning: bulk removal -->
+      <div class="alert alert-error" role="alert">
+        <span class="alert-icon">⚠</span>
+        <div>
+          <strong>Bulk removal alert:</strong> 7 providers (0.9% of network) are being removed.
+          This is within normal thresholds, but please verify this is intentional before confirming.
+        </div>
+      </div>
+
+    </div><!-- /ui-card-body -->
+
+    <div class="ui-card-footer">
+      <div class="footer-left">
+        <button class="btn btn-neutral" onclick="alert('Change report downloaded.')">⬇ Download Change Report</button>
+        <button class="btn btn-destructive" onclick="alert('Staging cancelled.')">Cancel</button>
+      </div>
+      <button class="btn btn-brand" onclick="confirmMapping()">
+        Confirm &amp; Proceed to Mapping ›
+      </button>
+    </div>
+  </div><!-- /ui-card -->
+
+  <!-- Post-confirm agent bubble -->
+  <div id="confirm-response" class="agent-bubble" style="display:none; border-color:#4bca81; background:#f2fbf2;">
+    <div class="agent-label">🤖 Roster Manager Agent</div>
+    <div class="agent-text">
+      ✅ Confirmed. Triggering DPE Gen AI field mapping now. Salesforce will open the mapping
+      review screen — please review the suggested column → DLO field mappings and confirm them
+      to proceed to ingestion.
+    </div>
+  </div>
+
+</div><!-- /agent-wrapper -->
+
+<script>
+  function toggleExp(btn) {
+    const section = btn.closest('.exp-section');
+    const isOpen = section.classList.toggle('is-open');
+    btn.setAttribute('aria-expanded', String(isOpen));
+  }
+  function confirmMapping() {
+    const el = document.getElementById('confirm-response');
+    el.style.display = 'block';
+    el.scrollIntoView({ behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>

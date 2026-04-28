@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Progress_Percentage__c</fullName>
+    <label>Progress Percentage</label>
+    <type>Number</type>
+    <required>false</required>
+    <precision>5</precision>
+    <scale>2</scale>
+    <formula>
+IF(
+    ISBLANK(TEXT(Case_Type__c)),
+    0,
+    (
+        (IF(Member_Identified__c, 1, 0) +
+        IF(Complaint_Details_Captured__c, 1, 0) +
+        IF(Intake_Basics_Set__c, 1, 0) +
+        IF(Service_Type_Determined__c, 1, 0) +
+        IF(Late_Filing_Checked__c, 1, 0) +
+        IF(AOR_Validated__c, 1, 0) +
+        IF(Case_Created__c, 1, 0)) / 7
+    ) * 100
+)
+    </formula>
+</CustomField>
+

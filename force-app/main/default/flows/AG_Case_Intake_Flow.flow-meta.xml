@@ -1,0 +1,1605 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>60.0</apiVersion>
+    <description>A&amp;G Case Intake Flow - Comprehensive intake process for Appeals and Grievances</description>
+    <label>A&amp;G Case Intake Flow</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>Flow</processType>
+    <status>Active</status>
+    
+    <!-- START -->
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Screen_Case_Type_Selection</targetReference>
+        </connector>
+    </start>
+
+    <!-- VARIABLES -->
+    <variables>
+        <name>Late_Filing_Flag</name>
+        <dataType>Boolean</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <value>
+            <booleanValue>false</booleanValue>
+        </value>
+    </variables>
+    <variables>
+        <name>var_MemberAccount</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Account</objectType>
+    </variables>
+    <variables>
+        <name>var_MemberAccountId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>var_MemberAccountsList</name>
+        <dataType>SObject</dataType>
+        <isCollection>true</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Account</objectType>
+    </variables>
+    <variables>
+        <name>var_SelectedPriorAuthId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+
+    <!-- ALL CHOICES -->
+    <choices>
+        <name>Choice_Mail</name>
+        <choiceText>Mail</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Mail</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Fax</name>
+        <choiceText>Fax</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Fax</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Online</name>
+        <choiceText>Online</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Online</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Call</name>
+        <choiceText>Call</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Call</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Appeal</name>
+        <choiceText>Appeal</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Appeal</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Grievance</name>
+        <choiceText>Grievance</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Grievance</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Coverage_Determination</name>
+        <choiceText>Coverage Determination</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Coverage Determination</stringValue>
+        </value>
+    </choices>
+    
+    <!-- GRIEVANCE CATEGORIES -->
+    <choices>
+        <name>Choice_QOC</name>
+        <choiceText>Quality of Care (QOC)</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Quality of Care (QOC)</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Access_to_Care</name>
+        <choiceText>Access to Care</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Access to Care</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Interpersonal</name>
+        <choiceText>Interpersonal</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Interpersonal</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Administrative</name>
+        <choiceText>Administrative</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Administrative</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Timeliness</name>
+        <choiceText>Timeliness</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Timeliness</stringValue>
+        </value>
+    </choices>
+    
+    <!-- APPEAL CATEGORIES -->
+    <choices>
+        <name>Choice_Medical_Necessity</name>
+        <choiceText>Medical Necessity</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Medical Necessity</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Pharmacy</name>
+        <choiceText>Pharmacy (Part D)</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Pharmacy (Part D)</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Benefit_Denial</name>
+        <choiceText>Benefit Denial</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Benefit Denial</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Reimbursement</name>
+        <choiceText>Reimbursement</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Reimbursement</stringValue>
+        </value>
+    </choices>
+    
+    <!-- GRIEVANCE SUB-CATEGORIES -->
+    <choices>
+        <name>Choice_Clinical_Competency</name>
+        <choiceText>Clinical Competency</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Clinical Competency</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Facility_Conditions</name>
+        <choiceText>Facility Conditions</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Facility Conditions</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Appointment_Wait_Times</name>
+        <choiceText>Appointment Wait Times</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Appointment Wait Times</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Network_Adequacy</name>
+        <choiceText>Network Adequacy</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Network Adequacy</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Staff_Provider_Rudeness</name>
+        <choiceText>Staff/Provider Rudeness</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Staff/Provider Rudeness</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Cultural_Sensitivity</name>
+        <choiceText>Cultural Sensitivity</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Cultural Sensitivity</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Enrollment_Disenrollment</name>
+        <choiceText>Enrollment/Disenrollment</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Enrollment/Disenrollment</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Marketing_Misrepresentation</name>
+        <choiceText>Marketing Misrepresentation</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Marketing Misrepresentation</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Processing_Delays</name>
+        <choiceText>Processing Delays</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Processing Delays</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Refusal_to_Expedite</name>
+        <choiceText>Refusal to Expedite</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Refusal to Expedite</stringValue>
+        </value>
+    </choices>
+    
+    <!-- APPEAL SUB-CATEGORIES -->
+    <choices>
+        <name>Choice_Level_of_Care</name>
+        <choiceText>Level of Care</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Level of Care</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Experimental_Investigational</name>
+        <choiceText>Experimental/Investigational</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Experimental/Investigational</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Formulary_Exception</name>
+        <choiceText>Formulary Exception</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Formulary Exception</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Tiering_Exception</name>
+        <choiceText>Tiering Exception</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Tiering Exception</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Non_Covered_Service</name>
+        <choiceText>Non-Covered Service</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Non-Covered Service</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Exceeds_Benefit_Limit</name>
+        <choiceText>Exceeds Benefit Limit</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Exceeds Benefit Limit</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Payment_Dispute</name>
+        <choiceText>Payment Dispute</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Payment Dispute</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Balance_Billing</name>
+        <choiceText>Balance Billing</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Balance Billing</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Standard</name>
+        <choiceText>Standard</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Standard</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Expedited</name>
+        <choiceText>Expedited</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Expedited</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Member</name>
+        <choiceText>Member</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Member</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Provider</name>
+        <choiceText>Provider</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Provider</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Auth_Rep</name>
+        <choiceText>Authorized Representative</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Authorized Representative</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Prior_Auth</name>
+        <choiceText>Prior Auth</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Prior Auth</stringValue>
+        </value>
+    </choices>
+    <choices>
+        <name>Choice_Claim</name>
+        <choiceText>Claim</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Claim</stringValue>
+        </value>
+    </choices>
+
+    <!-- ALL RECORD LOOKUPS -->
+    <recordLookups>
+        <name>Get_Member_Account</name>
+        <label>Get Member Account</label>
+        <locationX>50</locationX>
+        <locationY>350</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Decision_Member_Found</targetReference>
+        </connector>
+        <filterLogic>(1 AND 2 AND 3) OR 4</filterLogic>
+        <filters>
+            <field>FirstName</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>Member_First_Name</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>LastName</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>Member_Last_Name</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>PersonBirthdate</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>Member_DOB</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Member_ID__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>Member_ID_Input</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>false</getFirstRecordOnly>
+        <object>Account</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+
+    <!-- ALL DECISIONS -->
+    <decisions>
+        <name>Decision_Member_Found</name>
+        <label>Member Found?</label>
+        <locationX>50</locationX>
+        <locationY>458</locationY>
+        <defaultConnector>
+            <targetReference>Screen_Member_Not_Found</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Member Not Found</defaultConnectorLabel>
+        <rules>
+            <name>Single_Member_Found</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Member_Account</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Decision_Single_Or_Multiple</targetReference>
+            </connector>
+            <label>Member Found</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Decision_Single_Or_Multiple</name>
+        <label>Single or Multiple Members?</label>
+        <locationX>176</locationX>
+        <locationY>566</locationY>
+        <defaultConnector>
+            <targetReference>Assign_Member_List</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Multiple Members</defaultConnectorLabel>
+        <rules>
+            <name>Only_One_Member</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Member_Account</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Assign_Single_Member</targetReference>
+            </connector>
+            <label>Only One Member</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Decision_Is_Appeal</name>
+        <label>Is Appeal?</label>
+        <locationX>50</locationX>
+        <locationY>998</locationY>
+        <defaultConnector>
+            <targetReference>Screen_Appealant_Info</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Not Appeal</defaultConnectorLabel>
+        <rules>
+            <name>Is_Appeal</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Complaint_Type_Initial</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <stringValue>Appeal</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Screen_Associated_Case_Info</targetReference>
+            </connector>
+            <label>Is Appeal</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Decision_AOR_Required</name>
+        <label>AOR Required?</label>
+        <locationX>50</locationX>
+        <locationY>674</locationY>
+        <defaultConnector>
+            <targetReference>Calculate_Late_Filing</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>No AOR Required</defaultConnectorLabel>
+        <rules>
+            <name>AOR_Is_Required</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>AOR_Required_Checkbox</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Screen_AOR_Validation</targetReference>
+            </connector>
+            <label>AOR Required</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Decision_Check_Late_Filing</name>
+        <label>Check Late Filing</label>
+        <locationX>50</locationX>
+        <locationY>998</locationY>
+        <defaultConnector>
+            <targetReference>Screen_Review_Submit</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Not Late Filed</defaultConnectorLabel>
+        <rules>
+            <name>Is_Late_Filed</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Complaint_Type_Initial</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <stringValue>Appeal</stringValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>Initial_Determination_Closure_Date</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Decision_Beyond_60_Days</targetReference>
+            </connector>
+            <label>Is Appeal with Determination Date</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Decision_Beyond_60_Days</name>
+        <label>Beyond 60 Days?</label>
+        <locationX>176</locationX>
+        <locationY>1106</locationY>
+        <defaultConnector>
+            <targetReference>Screen_Review_Submit</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Within 60 Days</defaultConnectorLabel>
+        <rules>
+            <name>Beyond_60_Days_Rule</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Formula_Days_Since_Determination</leftValueReference>
+                <operator>GreaterThan</operator>
+                <rightValue>
+                    <numberValue>60.0</numberValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Screen_Good_Cause</targetReference>
+            </connector>
+            <label>Beyond 60 Days</label>
+        </rules>
+    </decisions>
+
+    <!-- ALL FORMULAS -->
+    <formulas>
+        <name>Formula_Days_Since_Determination</name>
+        <dataType>Number</dataType>
+        <expression>TODAY() - {!Initial_Determination_Closure_Date}</expression>
+        <scale>0</scale>
+    </formulas>
+    <formulas>
+        <name>Formula_Case_Subject</name>
+        <dataType>String</dataType>
+        <expression>{!Complaint_Type_Initial} &amp; " - " &amp; {!Member_Last_Name} &amp; " - " &amp; TEXT({!Organization_Received_Date})</expression>
+    </formulas>
+
+    <!-- ALL ASSIGNMENTS -->
+    <assignments>
+        <name>Assign_Single_Member</name>
+        <label>Assign Single Member</label>
+        <locationX>50</locationX>
+        <locationY>674</locationY>
+        <assignmentItems>
+            <assignToReference>var_MemberAccountsList</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Get_Member_Account</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Loop_Get_First_Member</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Assign_First_Member_Id</name>
+        <label>Assign First Member ID</label>
+        <locationX>50</locationX>
+        <locationY>890</locationY>
+        <assignmentItems>
+            <assignToReference>var_MemberAccountId</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Loop_Get_First_Member.Id</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Screen_Member_Found_Confirmation</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Assign_Member_List</name>
+        <label>Assign Member List</label>
+        <locationX>302</locationX>
+        <locationY>674</locationY>
+        <assignmentItems>
+            <assignToReference>var_MemberAccountsList</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Get_Member_Account</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Screen_Select_Member</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Calculate_Late_Filing</name>
+        <label>Calculate Late Filing</label>
+        <locationX>50</locationX>
+        <locationY>998</locationY>
+        <assignmentItems>
+            <assignToReference>Late_Filing_Flag</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <booleanValue>false</booleanValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Decision_Check_Late_Filing</targetReference>
+        </connector>
+    </assignments>
+
+    <!-- ALL LOOPS -->
+    <loops>
+        <name>Loop_Get_First_Member</name>
+        <label>Get First Member from Results</label>
+        <locationX>50</locationX>
+        <locationY>782</locationY>
+        <collectionReference>var_MemberAccountsList</collectionReference>
+        <iterationOrder>Asc</iterationOrder>
+        <nextValueConnector>
+            <targetReference>Assign_First_Member_Id</targetReference>
+        </nextValueConnector>
+        <noMoreValuesConnector>
+            <targetReference>Screen_Case_Basic_Info</targetReference>
+        </noMoreValuesConnector>
+    </loops>
+
+    <!-- ALL RECORD CREATES -->
+    <recordCreates>
+        <name>Create_Case_Record</name>
+        <label>Create Case Record</label>
+        <locationX>50</locationX>
+        <locationY>1430</locationY>
+        <connector>
+            <targetReference>Create_Care_Request_Record</targetReference>
+        </connector>
+        <inputAssignments>
+            <field>Subject</field>
+            <value>
+                <elementReference>Formula_Case_Subject</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Description</field>
+            <value>
+                <elementReference>Member_Narrative</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Status</field>
+            <value>
+                <stringValue>New</stringValue>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Priority</field>
+            <value>
+                <elementReference>Case_Urgency</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>AccountId</field>
+            <value>
+                <elementReference>var_MemberAccountId</elementReference>
+            </value>
+        </inputAssignments>
+        <object>Case</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordCreates>
+    <recordCreates>
+        <name>Create_Care_Request_Record</name>
+        <label>Create Care Request Record</label>
+        <locationX>50</locationX>
+        <locationY>1538</locationY>
+        <connector>
+            <targetReference>Create_AG_Record</targetReference>
+        </connector>
+        <object>CareRequest</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordCreates>
+    <recordCreates>
+        <name>Create_AG_Record</name>
+        <label>Create Appeals &amp; Grievances Record</label>
+        <locationX>50</locationX>
+        <locationY>1646</locationY>
+        <connector>
+            <targetReference>Screen_Success</targetReference>
+        </connector>
+        <inputAssignments>
+            <field>AG_Case__c</field>
+            <value>
+                <elementReference>Create_Case_Record</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Member_Account__c</field>
+            <value>
+                <elementReference>var_MemberAccountId</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Intake_Channel__c</field>
+            <value>
+                <elementReference>Intake_Channel</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Organization_Received_Date__c</field>
+            <value>
+                <elementReference>Organization_Received_Date</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Complaint_Type__c</field>
+            <value>
+                <elementReference>Complaint_Type_Initial</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Complaint_Category__c</field>
+            <value>
+                <elementReference>Complaint_Category</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Case_Urgency__c</field>
+            <value>
+                <elementReference>Case_Urgency</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Justification_for_Urgency__c</field>
+            <value>
+                <elementReference>Justification_for_Urgency</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Member_Narrative__c</field>
+            <value>
+                <elementReference>Member_Narrative</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Appealant__c</field>
+            <value>
+                <elementReference>Appealant</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>AOR_Required__c</field>
+            <value>
+                <elementReference>AOR_Required_Checkbox</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>AOR_Valid__c</field>
+            <value>
+                <elementReference>AOR_Valid_Checkbox</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>AOR_Form_Received_Date__c</field>
+            <value>
+                <elementReference>AOR_Form_Received_Date</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>AOR_Effective_Start_Date__c</field>
+            <value>
+                <elementReference>AOR_Effective_Start_Date</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>AOR_Effective_End_Date__c</field>
+            <value>
+                <elementReference>AOR_Effective_End_Date</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Valid_AOR_Form_Missing__c</field>
+            <value>
+                <elementReference>Valid_AOR_Form_Missing</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Associated_Case_Type__c</field>
+            <value>
+                <elementReference>Associated_Case_Type</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Associated_Case_Id__c</field>
+            <value>
+                <elementReference>Associated_Case_ID</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Authorization_ID__c</field>
+            <value>
+                <elementReference>Authorization_ID</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Service_Date__c</field>
+            <value>
+                <elementReference>Service_Date</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Service_Description__c</field>
+            <value>
+                <elementReference>Service_Description</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Provider_NPI__c</field>
+            <value>
+                <elementReference>Provider_NPI</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Primary_Diagnosis_ICD10__c</field>
+            <value>
+                <elementReference>Primary_Diagnosis_ICD10</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Initial_Determination_Closure_Date__c</field>
+            <value>
+                <elementReference>Initial_Determination_Closure_Date</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Late_Filing__c</field>
+            <value>
+                <elementReference>Late_Filing_Flag</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Good_Cause_Required__c</field>
+            <value>
+                <elementReference>Good_Cause_Required</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Good_Cause_Reason__c</field>
+            <value>
+                <elementReference>Good_Cause_Reason</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Case_Creation_Date__c</field>
+            <value>
+                <elementReference>$Flow.CurrentDateTime</elementReference>
+            </value>
+        </inputAssignments>
+        <object>Appeals_Grievances__c</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordCreates>
+
+    <!-- ALL SCREENS -->
+    <screens>
+        <name>Screen_Case_Type_Selection</name>
+        <label>Case Type Selection</label>
+        <locationX>50</locationX>
+        <locationY>134</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Screen_Welcome</targetReference>
+        </connector>
+        <fields>
+            <name>Display_Welcome_Header</name>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 20px;&quot;&gt;Appeals &amp;amp; Grievances Case Intake&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Welcome! Let's start by identifying the type of case you're creating.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>Complaint_Type_Initial</name>
+            <choiceReferences>Choice_Appeal</choiceReferences>
+            <choiceReferences>Choice_Grievance</choiceReferences>
+            <choiceReferences>Choice_Coverage_Determination</choiceReferences>
+            <dataType>String</dataType>
+            <fieldText>What type of case are you creating?</fieldText>
+            <fieldType>RadioButtons</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+        <nextOrFinishButtonLabel>Next</nextOrFinishButtonLabel>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Screen_Welcome</name>
+        <label>Welcome - Member Search</label>
+        <locationX>50</locationX>
+        <locationY>242</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Get_Member_Account</targetReference>
+        </connector>
+        <nextOrFinishButtonLabel>Search</nextOrFinishButtonLabel>
+        <fields>
+            <name>Display_Member_Search_Text</name>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 16px;&quot;&gt;Member Search&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Please enter member information to search:&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Option 1:&lt;/b&gt; Search by Member ID alone&lt;/p&gt;&lt;p&gt;&lt;b&gt;Option 2:&lt;/b&gt; Search by First Name + Last Name + Date of Birth&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>Member_ID_Input</name>
+            <dataType>String</dataType>
+            <fieldText>Member ID</fieldText>
+            <fieldType>InputField</fieldType>
+            <helpText>Enter Member ID to search (e.g., MEM-001)</helpText>
+            <isRequired>false</isRequired>
+        </fields>
+        <fields>
+            <name>Member_First_Name</name>
+            <dataType>String</dataType>
+            <fieldText>Member First Name</fieldText>
+            <fieldType>InputField</fieldType>
+            <helpText>Required for name-based search</helpText>
+            <isRequired>false</isRequired>
+        </fields>
+        <fields>
+            <name>Member_Last_Name</name>
+            <dataType>String</dataType>
+            <fieldText>Member Last Name</fieldText>
+            <fieldType>InputField</fieldType>
+            <helpText>Required for name-based search</helpText>
+            <isRequired>false</isRequired>
+        </fields>
+        <fields>
+            <name>Member_DOB</name>
+            <dataType>Date</dataType>
+            <fieldText>Member Date of Birth</fieldText>
+            <fieldType>InputField</fieldType>
+            <helpText>Required for name-based search</helpText>
+            <isRequired>false</isRequired>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Screen_Select_Member</name>
+        <label>Select Member Account</label>
+        <locationX>302</locationX>
+        <locationY>782</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Screen_Case_Basic_Info</targetReference>
+        </connector>
+        <fields>
+            <name>Display_Select_Member_Header</name>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 16px;&quot;&gt;Search Results Found&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;We found {!var_MemberAccountsList} member account(s) matching your search criteria.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Please select the correct member account below to continue:&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>Member_Account_Lookup</name>
+            <extensionName>flowruntime:lookup</extensionName>
+            <fieldType>ComponentInstance</fieldType>
+            <inputParameters>
+                <name>fieldApiName</name>
+                <value>
+                    <stringValue>Id</stringValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>label</name>
+                <value>
+                    <stringValue>Select Member Account</stringValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>objectApiName</name>
+                <value>
+                    <stringValue>Account</stringValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>required</name>
+                <value>
+                    <booleanValue>true</booleanValue>
+                </value>
+            </inputParameters>
+            <isRequired>true</isRequired>
+            <outputParameters>
+                <assignToReference>var_MemberAccountId</assignToReference>
+                <name>recordId</name>
+            </outputParameters>
+        </fields>
+        <nextOrFinishButtonLabel>Next</nextOrFinishButtonLabel>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Screen_Member_Found_Confirmation</name>
+        <label>Member Found - Confirm</label>
+        <locationX>50</locationX>
+        <locationY>998</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Screen_Case_Basic_Info</targetReference>
+        </connector>
+        <nextOrFinishButtonLabel>Next</nextOrFinishButtonLabel>
+        <fields>
+            <name>Display_Member_Found_Header</name>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;color: rgb(11, 134, 78); font-size: 16px;&quot;&gt;✓ Member Found&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Please confirm this is the correct member:&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>Display_Member_Details</name>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 14px;&quot;&gt;Member Information&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Name:&lt;/b&gt; {!Loop_Get_First_Member.FirstName} {!Loop_Get_First_Member.LastName}&lt;/p&gt;&lt;p&gt;&lt;b&gt;Member ID:&lt;/b&gt; {!Loop_Get_First_Member.Member_ID__c}&lt;/p&gt;&lt;p&gt;&lt;b&gt;Date of Birth:&lt;/b&gt; {!Loop_Get_First_Member.PersonBirthdate}&lt;/p&gt;&lt;p&gt;&lt;b&gt;Email:&lt;/b&gt; {!Loop_Get_First_Member.PersonEmail}&lt;/p&gt;&lt;p&gt;&lt;b&gt;Phone:&lt;/b&gt; {!Loop_Get_First_Member.Phone}&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Click &lt;b&gt;Next&lt;/b&gt; to continue with this member, or &lt;b&gt;Previous&lt;/b&gt; to search again.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Screen_Member_Not_Found</name>
+        <label>Member Not Found</label>
+        <locationX>302</locationX>
+        <locationY>566</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <fields>
+            <name>Display_Member_Not_Found</name>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;color: rgb(194, 57, 52); font-size: 16px;&quot;&gt;⚠ Member Not Found&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;No member account was found matching the information provided:&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Last Name:&lt;/b&gt; {!Member_Last_Name}&lt;/p&gt;&lt;p&gt;&lt;b&gt;Date of Birth:&lt;/b&gt; {!Member_DOB}&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Please verify the member information and try again, or contact your system administrator to create the member account.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Screen_Case_Basic_Info</name>
+        <label>Case Basic Information</label>
+        <locationX>50</locationX>
+        <locationY>1106</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Decision_Is_Appeal</targetReference>
+        </connector>
+        <nextOrFinishButtonLabel>Next</nextOrFinishButtonLabel>
+        <fields>
+            <name>Display_Case_Info_Header</name>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 16px;&quot;&gt;Case Information&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Member:&lt;/b&gt; {!var_MemberAccount.Name}&lt;/p&gt;&lt;p&gt;&lt;b&gt;Member ID:&lt;/b&gt; {!Member_ID_Input}&lt;/p&gt;&lt;p&gt;&lt;b&gt;Case Type:&lt;/b&gt; {!Complaint_Type_Initial}&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>Intake_Channel</name>
+            <choiceReferences>Choice_Mail</choiceReferences>
+            <choiceReferences>Choice_Fax</choiceReferences>
+            <choiceReferences>Choice_Online</choiceReferences>
+            <choiceReferences>Choice_Call</choiceReferences>
+            <dataType>String</dataType>
+            <fieldText>Intake Channel</fieldText>
+            <fieldType>DropdownBox</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+        <fields>
+            <name>Organization_Received_Date</name>
+            <dataType>Date</dataType>
+            <defaultValue>
+                <elementReference>$Flow.CurrentDate</elementReference>
+            </defaultValue>
+            <fieldText>Organization Received Date</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+        <fields>
+            <name>Complaint_Category</name>
+            <choiceReferences>Choice_QOC</choiceReferences>
+            <choiceReferences>Choice_Access_to_Care</choiceReferences>
+            <choiceReferences>Choice_Interpersonal</choiceReferences>
+            <choiceReferences>Choice_Administrative</choiceReferences>
+            <choiceReferences>Choice_Timeliness</choiceReferences>
+            <choiceReferences>Choice_Medical_Necessity</choiceReferences>
+            <choiceReferences>Choice_Pharmacy</choiceReferences>
+            <choiceReferences>Choice_Benefit_Denial</choiceReferences>
+            <choiceReferences>Choice_Reimbursement</choiceReferences>
+            <dataType>String</dataType>
+            <fieldText>Category</fieldText>
+            <fieldType>DropdownBox</fieldType>
+            <helpText>Grievances: QOC, Access to Care, Interpersonal, Administrative, Timeliness | Appeals: Medical Necessity, Pharmacy, Benefit Denial, Reimbursement</helpText>
+            <isRequired>true</isRequired>
+        </fields>
+        <fields>
+            <name>Complaint_Sub_Category</name>
+            <choiceReferences>Choice_Clinical_Competency</choiceReferences>
+            <choiceReferences>Choice_Facility_Conditions</choiceReferences>
+            <choiceReferences>Choice_Appointment_Wait_Times</choiceReferences>
+            <choiceReferences>Choice_Network_Adequacy</choiceReferences>
+            <choiceReferences>Choice_Staff_Provider_Rudeness</choiceReferences>
+            <choiceReferences>Choice_Cultural_Sensitivity</choiceReferences>
+            <choiceReferences>Choice_Enrollment_Disenrollment</choiceReferences>
+            <choiceReferences>Choice_Marketing_Misrepresentation</choiceReferences>
+            <choiceReferences>Choice_Processing_Delays</choiceReferences>
+            <choiceReferences>Choice_Refusal_to_Expedite</choiceReferences>
+            <choiceReferences>Choice_Level_of_Care</choiceReferences>
+            <choiceReferences>Choice_Experimental_Investigational</choiceReferences>
+            <choiceReferences>Choice_Formulary_Exception</choiceReferences>
+            <choiceReferences>Choice_Tiering_Exception</choiceReferences>
+            <choiceReferences>Choice_Non_Covered_Service</choiceReferences>
+            <choiceReferences>Choice_Exceeds_Benefit_Limit</choiceReferences>
+            <choiceReferences>Choice_Payment_Dispute</choiceReferences>
+            <choiceReferences>Choice_Balance_Billing</choiceReferences>
+            <dataType>String</dataType>
+            <fieldText>Sub-Category</fieldText>
+            <fieldType>DropdownBox</fieldType>
+            <helpText>Select the specific sub-category based on your selected category</helpText>
+            <isRequired>false</isRequired>
+        </fields>
+        <fields>
+            <name>Case_Urgency</name>
+            <choiceReferences>Choice_Standard</choiceReferences>
+            <choiceReferences>Choice_Expedited</choiceReferences>
+            <dataType>String</dataType>
+            <fieldText>Case Urgency</fieldText>
+            <fieldType>RadioButtons</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+        <fields>
+            <name>Justification_for_Urgency</name>
+            <fieldText>Justification for Urgency (if Expedited)</fieldText>
+            <fieldType>LargeTextArea</fieldType>
+            <isRequired>false</isRequired>
+            <visibilityRule>
+                <conditionLogic>and</conditionLogic>
+                <conditions>
+                    <leftValueReference>Case_Urgency</leftValueReference>
+                    <operator>EqualTo</operator>
+                    <rightValue>
+                        <stringValue>Expedited</stringValue>
+                    </rightValue>
+                </conditions>
+            </visibilityRule>
+        </fields>
+        <fields>
+            <name>Member_Narrative</name>
+            <fieldText>Member Narrative / Complaint Description</fieldText>
+            <fieldType>LargeTextArea</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Screen_Associated_Case_Info</name>
+        <label>Associated Case Information</label>
+        <locationX>176</locationX>
+        <locationY>782</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Screen_Appealant_Info</targetReference>
+        </connector>
+        <nextOrFinishButtonLabel>Next</nextOrFinishButtonLabel>
+        <fields>
+            <name>Display_Associated_Case_Header</name>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 16px;&quot;&gt;Associated Case Information&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Provide details about the prior authorization or claim being appealed.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>Associated_Case_Type</name>
+            <choiceReferences>Choice_Prior_Auth</choiceReferences>
+            <choiceReferences>Choice_Claim</choiceReferences>
+            <dataType>String</dataType>
+            <fieldText>Associated Case Type</fieldText>
+            <fieldType>RadioButtons</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+        <fields>
+            <name>Associated_Case_ID</name>
+            <dataType>String</dataType>
+            <fieldText>Associated Case ID / Reference Number</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+        <fields>
+            <name>Authorization_ID</name>
+            <dataType>String</dataType>
+            <fieldText>Authorization ID</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+            <visibilityRule>
+                <conditionLogic>and</conditionLogic>
+                <conditions>
+                    <leftValueReference>Associated_Case_Type</leftValueReference>
+                    <operator>EqualTo</operator>
+                    <rightValue>
+                        <stringValue>Prior Auth</stringValue>
+                    </rightValue>
+                </conditions>
+            </visibilityRule>
+        </fields>
+        <fields>
+            <name>Display_PA_Search_Text</name>
+            <fieldText>&lt;p&gt;&lt;b&gt;Or search for an existing Prior Authorization:&lt;/b&gt;&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+            <visibilityRule>
+                <conditionLogic>and</conditionLogic>
+                <conditions>
+                    <leftValueReference>Associated_Case_Type</leftValueReference>
+                    <operator>EqualTo</operator>
+                    <rightValue>
+                        <stringValue>Prior Auth</stringValue>
+                    </rightValue>
+                </conditions>
+            </visibilityRule>
+        </fields>
+        <fields>
+            <name>Select_Prior_Auth_Lookup</name>
+            <extensionName>flowruntime:lookup</extensionName>
+            <fieldType>ComponentInstance</fieldType>
+            <inputParameters>
+                <name>fieldApiName</name>
+                <value>
+                    <stringValue>Id</stringValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>label</name>
+                <value>
+                    <stringValue>Search and Select Prior Authorization</stringValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>objectApiName</name>
+                <value>
+                    <stringValue>CareRequest</stringValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>required</name>
+                <value>
+                    <booleanValue>false</booleanValue>
+                </value>
+            </inputParameters>
+            <isRequired>true</isRequired>
+            <outputParameters>
+                <assignToReference>var_SelectedPriorAuthId</assignToReference>
+                <name>recordId</name>
+            </outputParameters>
+            <visibilityRule>
+                <conditionLogic>and</conditionLogic>
+                <conditions>
+                    <leftValueReference>Associated_Case_Type</leftValueReference>
+                    <operator>EqualTo</operator>
+                    <rightValue>
+                        <stringValue>Prior Auth</stringValue>
+                    </rightValue>
+                </conditions>
+            </visibilityRule>
+        </fields>
+        <fields>
+            <name>Initial_Determination_Closure_Date</name>
+            <dataType>Date</dataType>
+            <fieldText>Initial Determination Closure Date</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+        <fields>
+            <name>Service_Date</name>
+            <dataType>Date</dataType>
+            <fieldText>Service Date</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+        <fields>
+            <name>Service_Description</name>
+            <fieldText>Service Description</fieldText>
+            <fieldType>LargeTextArea</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+        <fields>
+            <name>Provider_NPI</name>
+            <dataType>String</dataType>
+            <fieldText>Provider NPI</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+        <fields>
+            <name>Primary_Diagnosis_ICD10</name>
+            <dataType>String</dataType>
+            <fieldText>Primary Diagnosis (ICD-10)</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Screen_Appealant_Info</name>
+        <label>Appealant Information</label>
+        <locationX>50</locationX>
+        <locationY>890</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>false</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Decision_AOR_Required</targetReference>
+        </connector>
+        <fields>
+            <name>Display_Appealant_Header</name>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 16px;&quot;&gt;Appealant Information&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Who is filing this case?&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>Appealant</name>
+            <choiceReferences>Choice_Member</choiceReferences>
+            <choiceReferences>Choice_Provider</choiceReferences>
+            <choiceReferences>Choice_Auth_Rep</choiceReferences>
+            <dataType>String</dataType>
+            <fieldText>Appealant</fieldText>
+            <fieldType>RadioButtons</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+        <fields>
+            <name>AOR_Required_Checkbox</name>
+            <dataType>Boolean</dataType>
+            <fieldText>AOR (Authorized Representative) Form Required</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>true</isRequired>
+            <visibilityRule>
+                <conditionLogic>or</conditionLogic>
+                <conditions>
+                    <leftValueReference>Appealant</leftValueReference>
+                    <operator>EqualTo</operator>
+                    <rightValue>
+                        <stringValue>Provider</stringValue>
+                    </rightValue>
+                </conditions>
+                <conditions>
+                    <leftValueReference>Appealant</leftValueReference>
+                    <operator>EqualTo</operator>
+                    <rightValue>
+                        <stringValue>Authorized Representative</stringValue>
+                    </rightValue>
+                </conditions>
+            </visibilityRule>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Screen_AOR_Validation</name>
+        <label>AOR Validation</label>
+        <locationX>176</locationX>
+        <locationY>782</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>false</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Calculate_Late_Filing</targetReference>
+        </connector>
+        <fields>
+            <name>Display_AOR_Header</name>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 16px;&quot;&gt;Authorized Representative (AOR) Validation&lt;/b&gt;&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>AOR_Valid_Checkbox</name>
+            <dataType>Boolean</dataType>
+            <fieldText>Valid AOR Form on File?</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+        <fields>
+            <name>AOR_Form_Received_Date</name>
+            <dataType>DateTime</dataType>
+            <fieldText>AOR Form Received Date</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+            <visibilityRule>
+                <conditionLogic>and</conditionLogic>
+                <conditions>
+                    <leftValueReference>AOR_Valid_Checkbox</leftValueReference>
+                    <operator>EqualTo</operator>
+                    <rightValue>
+                        <booleanValue>true</booleanValue>
+                    </rightValue>
+                </conditions>
+            </visibilityRule>
+        </fields>
+        <fields>
+            <name>AOR_Effective_Start_Date</name>
+            <dataType>Date</dataType>
+            <fieldText>AOR Effective Start Date</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+            <visibilityRule>
+                <conditionLogic>and</conditionLogic>
+                <conditions>
+                    <leftValueReference>AOR_Valid_Checkbox</leftValueReference>
+                    <operator>EqualTo</operator>
+                    <rightValue>
+                        <booleanValue>true</booleanValue>
+                    </rightValue>
+                </conditions>
+            </visibilityRule>
+        </fields>
+        <fields>
+            <name>AOR_Effective_End_Date</name>
+            <dataType>Date</dataType>
+            <fieldText>AOR Effective End Date</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+            <visibilityRule>
+                <conditionLogic>and</conditionLogic>
+                <conditions>
+                    <leftValueReference>AOR_Valid_Checkbox</leftValueReference>
+                    <operator>EqualTo</operator>
+                    <rightValue>
+                        <booleanValue>true</booleanValue>
+                    </rightValue>
+                </conditions>
+            </visibilityRule>
+        </fields>
+        <fields>
+            <name>Valid_AOR_Form_Missing</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <booleanValue>false</booleanValue>
+            </defaultValue>
+            <fieldText>Flag: Valid AOR Form Missing (requires follow-up)</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>true</isRequired>
+            <visibilityRule>
+                <conditionLogic>and</conditionLogic>
+                <conditions>
+                    <leftValueReference>AOR_Valid_Checkbox</leftValueReference>
+                    <operator>EqualTo</operator>
+                    <rightValue>
+                        <booleanValue>false</booleanValue>
+                    </rightValue>
+                </conditions>
+            </visibilityRule>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Screen_Good_Cause</name>
+        <label>Good Cause for Late Filing</label>
+        <locationX>302</locationX>
+        <locationY>1214</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>false</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Screen_Review_Submit</targetReference>
+        </connector>
+        <fields>
+            <name>Display_Good_Cause_Warning</name>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;color: rgb(194, 57, 52); font-size: 16px;&quot;&gt;⚠ Late Filing Detected&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;This appeal was filed more than 60 days after the initial determination. Please document good cause for late filing.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>Good_Cause_Required</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <booleanValue>true</booleanValue>
+            </defaultValue>
+            <fieldText>Good Cause Required</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+        <fields>
+            <name>Good_Cause_Reason</name>
+            <fieldText>Good Cause Reason / Explanation</fieldText>
+            <fieldType>LargeTextArea</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Screen_Review_Submit</name>
+        <label>Review and Submit</label>
+        <locationX>50</locationX>
+        <locationY>1322</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>false</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Create_Case_Record</targetReference>
+        </connector>
+        <fields>
+            <name>Display_Review_Header</name>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 16px;&quot;&gt;Review Case Information&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Please review the information below before submitting the case.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>Display_Member_Summary</name>
+            <fieldText>&lt;p&gt;&lt;b&gt;Member:&lt;/b&gt; {!Member_ID_Input}&lt;/p&gt;&lt;p&gt;&lt;b&gt;Complaint Type:&lt;/b&gt; {!Complaint_Type_Initial}&lt;/p&gt;&lt;p&gt;&lt;b&gt;Category:&lt;/b&gt; {!Complaint_Category}&lt;/p&gt;&lt;p&gt;&lt;b&gt;Urgency:&lt;/b&gt; {!Case_Urgency}&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Screen_Success</name>
+        <label>Success</label>
+        <locationX>50</locationX>
+        <locationY>1754</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <fields>
+            <name>Display_Success_Message</name>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;color: rgb(11, 134, 78); font-size: 18px;&quot;&gt;✓ Case Successfully Created&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;The Appeals &amp;amp; Grievances case has been successfully created.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Case ID:&lt;/b&gt; {!Create_Case_Record}&lt;/p&gt;&lt;p&gt;&lt;b&gt;A&amp;amp;G Record ID:&lt;/b&gt; {!Create_AG_Record}&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+</Flow>

@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bot xmlns="http://soap.sforce.com/2006/04/metadata">
+    <botMlDomain>
+        <label>Case Status Agent Domain</label>
+        <mlIntents>
+            <developerName>Check_Case_Status</developerName>
+            <label>Check Case Status</label>
+            <mlIntentUtterances>
+                <utterance>What is the status of my case</utterance>
+            </mlIntentUtterances>
+            <mlIntentUtterances>
+                <utterance>Check case status</utterance>
+            </mlIntentUtterances>
+            <mlIntentUtterances>
+                <utterance>Where is my case</utterance>
+            </mlIntentUtterances>
+            <mlIntentUtterances>
+                <utterance>What&apos;s happening with case</utterance>
+            </mlIntentUtterances>
+            <mlIntentUtterances>
+                <utterance>Case number status</utterance>
+            </mlIntentUtterances>
+            <mlIntentUtterances>
+                <utterance>I want to know about my case</utterance>
+            </mlIntentUtterances>
+            <mlIntentUtterances>
+                <utterance>Tell me about case</utterance>
+            </mlIntentUtterances>
+            <mlIntentUtterances>
+                <utterance>Get case information</utterance>
+            </mlIntentUtterances>
+            <mlIntentUtterances>
+                <utterance>What is my case status</utterance>
+            </mlIntentUtterances>
+            <mlIntentUtterances>
+                <utterance>Has my case been resolved</utterance>
+            </mlIntentUtterances>
+        </mlIntents>
+        <mlSlotClasses>
+            <developerName>Case_Number</developerName>
+            <extractionRegex>[0-9]{8}</extractionRegex>
+            <extractionType>Pattern</extractionType>
+            <label>Case Number</label>
+        </mlSlotClasses>
+        <name>CaseStatusDomain</name>
+    </botMlDomain>
+    <botVersions>
+        <fullName>v1</fullName>
+        <botDialogs>
+            <developerName>Check_Case_Status_Dialog</developerName>
+            <label>Check Case Status Dialog</label>
+            <botSteps>
+                <stepIdentifier>1</stepIdentifier>
+                <type>Start</type>
+                <botSteps>
+                    <stepIdentifier>2</stepIdentifier>
+                    <type>CollectInput</type>
+                    <botMessages>
+                        <message>I can help you check the status of your case. Please provide your case number.</message>
+                        <messageIdentifier>CollectCaseNumber</messageIdentifier>
+                    </botMessages>
+                    <botStepConditions>
+                        <stepIdentifier>3</stepIdentifier>
+                        <targetStepIdentifier>3</targetStepIdentifier>
+                    </botStepConditions>
+                    <botVariableOperation>
+                        <botVariableOperands>
+                            <targetVariableName>CaseNumber</targetVariableName>
+                        </botVariableOperands>
+                        <type>Set</type>
+                    </botVariableOperation>
+                </botSteps>
+            </botSteps>
+            <botSteps>
+                <stepIdentifier>3</stepIdentifier>
+                <type>InvocableAction</type>
+                <botMessages>
+                    <message>Let me check that case for you...</message>
+                    <messageIdentifier>CheckingCase</messageIdentifier>
+                </botMessages>
+                <botStepConditions>
+                    <stepIdentifier>4</stepIdentifier>
+                    <targetStepIdentifier>4</targetStepIdentifier>
+                </botStepConditions>
+                <botInvocation>
+                    <invocationActionName>CaseStatusAction</invocationActionName>
+                    <invocationActionType>apex</invocationActionType>
+                    <invocationMappings>
+                        <parameterName>caseNumber</parameterName>
+                        <variableName>CaseNumber</variableName>
+                        <type>Input</type>
+                    </invocationMappings>
+                    <invocationMappings>
+                        <parameterName>statusMessage</parameterName>
+                        <variableName>StatusMessage</variableName>
+                        <type>Output</type>
+                    </invocationMappings>
+                    <invocationMappings>
+                        <parameterName>success</parameterName>
+                        <variableName>Success</variableName>
+                        <type>Output</type>
+                    </invocationMappings>
+                    <invocationMappings>
+                        <parameterName>errorMessage</parameterName>
+                        <variableName>ErrorMessage</variableName>
+                        <type>Output</type>
+                    </invocationMappings>
+                </botInvocation>
+            </botSteps>
+            <botSteps>
+                <stepIdentifier>4</stepIdentifier>
+                <type>Message</type>
+                <botMessages>
+                    <message>{!StatusMessage}</message>
+                    <messageIdentifier>DisplayStatus</messageIdentifier>
+                </botMessages>
+                <botStepConditions>
+                    <stepIdentifier>5</stepIdentifier>
+                    <targetStepIdentifier>5</targetStepIdentifier>
+                </botStepConditions>
+            </botSteps>
+            <botSteps>
+                <stepIdentifier>5</stepIdentifier>
+                <type>End</type>
+                <botMessages>
+                    <message>Is there anything else I can help you with?</message>
+                    <messageIdentifier>ClosingMessage</messageIdentifier>
+                </botMessages>
+            </botSteps>
+            <mlIntent>Check_Case_Status</mlIntent>
+            <showInFooterMenu>false</showInFooterMenu>
+        </botDialogs>
+        <botDialogs>
+            <developerName>Welcome</developerName>
+            <label>Welcome</label>
+            <botSteps>
+                <stepIdentifier>1</stepIdentifier>
+                <type>Start</type>
+                <botSteps>
+                    <stepIdentifier>2</stepIdentifier>
+                    <type>Message</type>
+                    <botMessages>
+                        <message>Hello! I&apos;m your Case Status Assistant. I can help you check the status of your cases. Just ask me about a case number and I&apos;ll provide you with the latest information.</message>
+                        <messageIdentifier>WelcomeMessage</messageIdentifier>
+                    </botMessages>
+                    <botStepConditions>
+                        <stepIdentifier>3</stepIdentifier>
+                        <targetStepIdentifier>3</targetStepIdentifier>
+                    </botStepConditions>
+                </botSteps>
+            </botSteps>
+            <botSteps>
+                <stepIdentifier>3</stepIdentifier>
+                <type>End</type>
+            </botSteps>
+            <isWelcomeDialog>true</isWelcomeDialog>
+            <showInFooterMenu>false</showInFooterMenu>
+        </botDialogs>
+        <conversationSystemDialog>
+            <dialog>TransferFailed</dialog>
+            <type>TransferFailed</type>
+        </conversationSystemDialog>
+        <conversationSystemDialog>
+            <dialog>TransferSucceeded</dialog>
+            <type>TransferSucceeded</type>
+        </conversationSystemDialog>
+        <conversationSystemDialog>
+            <dialog>EndConversation</dialog>
+            <type>EndConversation</type>
+        </conversationSystemDialog>
+        <conversationVariables>
+            <dataType>Text</dataType>
+            <developerName>CaseNumber</developerName>
+            <label>Case Number</label>
+        </conversationVariables>
+        <conversationVariables>
+            <dataType>Text</dataType>
+            <developerName>StatusMessage</developerName>
+            <label>Status Message</label>
+        </conversationVariables>
+        <conversationVariables>
+            <dataType>Boolean</dataType>
+            <developerName>Success</developerName>
+            <label>Success</label>
+        </conversationVariables>
+        <conversationVariables>
+            <dataType>Text</dataType>
+            <developerName>ErrorMessage</developerName>
+            <label>Error Message</label>
+        </conversationVariables>
+        <entryDialog>Welcome</entryDialog>
+        <label>v1</label>
+        <mainMenuDialog>Welcome</mainMenuDialog>
+    </botVersions>
+    <defaultOutboundFlow>
+        <fullName>Default_Outbound_Flow</fullName>
+    </defaultOutboundFlow>
+    <description>AI-powered service agent that helps customers check the status of their cases</description>
+    <label>Case Status Service Agent</label>
+    <logPrivateConversationData>false</logPrivateConversationData>
+    <richContentEnabled>true</richContentEnabled>
+</Bot>
