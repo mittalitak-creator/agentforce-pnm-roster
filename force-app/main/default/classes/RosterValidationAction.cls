@@ -1,8 +1,7 @@
 /**
  * Invocable Action: Run all pre-validation rules (Categories 1–6) on a roster CSV file.
- * Called after RosterContextAction confirms the CRF is in FRESH state.
- * Reads the file body from ContentDocumentLink, runs every rule row-by-row,
- * and returns structured results for the agent to narrate.
+ * Takes only crfId — reads the attached file directly from ContentVersion via ContentDocumentId__c.
+ * Agentforce agents cannot supply file contents; the action fetches the file itself.
  */
 public with sharing class RosterValidationAction {
 
@@ -28,7 +27,7 @@ public with sharing class RosterValidationAction {
 
     @InvocableMethod(
         label='Validate Roster File'
-        description='Runs all pre-validation rules (file structure, columns, row-level format, cross-row, cross-system, lookup existence) on the roster CSV attached to the CRF. Returns pass/fail per rule and a structured list of row errors for agent narration.'
+        description='Runs all pre-validation rules on the roster CSV attached to the CRF record. Pass the CRF record ID — the action fetches the file directly. Returns pass/fail per rule and row errors for agent narration.'
         category='Provider Roster Management'
     )
     public static List<Output> execute(List<Input> inputs) {
@@ -45,9 +44,62 @@ public with sharing class RosterValidationAction {
         out.rowErrors = new List<RowError>();
         out.warnings = new List<RowError>();
 
+        if (String.isBlank(inp.crfId)) {
+            out.success = false;
+            out.abortReason = 'CRF record ID is required.';
+            out.agentNarration = 'Pre-validation aborted: no CRF record ID provided.';
+            return out;
+        }
+
+        // ── Read file from CRF ContentDocumentId__c ─────────────────────────
+        String fileName = '';
+        String fileBody = '';
+        Long fileSizeBytes = 0;
+
+        try {
+            List<SObject> crfList = Database.query(
+                'SELECT ContentDocumentId__c FROM CaseRelatedFile WHERE Id = :inp.crfId WITH USER_MODE LIMIT 1'
+            );
+            if (crfList.isEmpty()) {
+                out.success = false;
+                out.abortReason = 'CRF record not found: ' + inp.crfId;
+                out.agentNarration = 'Pre-validation aborted: ' + out.abortReason;
+                return out;
+            }
+            String contentDocId = (String) crfList[0].get('ContentDocumentId__c');
+            if (String.isBlank(contentDocId)) {
+                out.success = false;
+                out.abortReason = 'No file is attached to this CRF record. Please upload a CSV roster file first.';
+                out.agentNarration = 'Pre-validation aborted: ' + out.abortReason;
+                return out;
+            }
+            List<ContentVersion> cvList = [
+                SELECT Title, FileExtension, ContentSize, VersionData
+                FROM ContentVersion
+                WHERE ContentDocumentId = :contentDocId
+                AND IsLatest = true
+                WITH USER_MODE
+                LIMIT 1
+            ];
+            if (cvList.isEmpty()) {
+                out.success = false;
+                out.abortReason = 'Could not read the attached file. Please re-upload the file and try again.';
+                out.agentNarration = 'Pre-validation aborted: ' + out.abortReason;
+                return out;
+            }
+            ContentVersion cv = cvList[0];
+            fileName = cv.Title + (cv.FileExtension != null ? '.' + cv.FileExtension : '');
+            fileSizeBytes = cv.ContentSize;
+            fileBody = cv.VersionData.toString();
+        } catch (Exception e) {
+            out.success = false;
+            out.abortReason = 'Error reading attached file: ' + e.getMessage();
+            out.agentNarration = 'Pre-validation aborted: ' + out.abortReason;
+            return out;
+        }
+
         // ── Category 1: File Structure ──────────────────────────────────────
-        // F1: CSV only — check ContentDocument file extension
-        String fileName = inp.fileName != null ? inp.fileName : '';
+        // F1: CSV only
         Boolean isCsv = fileName.toLowerCase().endsWith('.csv');
         out.ruleResults.add(ruleResult('F1', 'File format must be CSV', isCsv,
             isCsv ? null : 'File "' + fileName + '" is not a CSV. Only CSV files are accepted. How to fix: Convert your file to CSV format before uploading.'));
@@ -58,9 +110,9 @@ public with sharing class RosterValidationAction {
         }
 
         // F3: File size ≤ 5 MB
-        Boolean sizeOk = inp.fileSizeBytes == null || inp.fileSizeBytes <= 5242880;
+        Boolean sizeOk = fileSizeBytes <= 5242880;
         out.ruleResults.add(ruleResult('F3', 'File size ≤ 5 MB', sizeOk,
-            sizeOk ? null : 'File is ' + (inp.fileSizeBytes / 1048576.0).setScale(1) + ' MB. Maximum allowed size is 5 MB. How to fix: Split the file into smaller batches and upload each separately.'));
+            sizeOk ? null : 'File is ' + (fileSizeBytes / 1048576.0).setScale(1) + ' MB. Maximum allowed size is 5 MB. How to fix: Split the file into smaller batches and upload each separately.'));
         if (!sizeOk) {
             out.success = false;
             out.abortReason = 'File exceeds 5 MB size limit.';
@@ -68,7 +120,7 @@ public with sharing class RosterValidationAction {
         }
 
         // Parse CSV body
-        if (String.isBlank(inp.fileBody)) {
+        if (String.isBlank(fileBody)) {
             out.ruleResults.add(ruleResult('F2', 'File must not be empty', false,
                 'The file is empty (no content). How to fix: Ensure the file contains a header row and at least one data row.'));
             out.success = false;
@@ -76,7 +128,7 @@ public with sharing class RosterValidationAction {
             return out;
         }
 
-        List<List<String>> rows = parseCsv(inp.fileBody);
+        List<List<String>> rows = parseCsv(fileBody);
 
         // F2: File not empty
         Boolean hasRows = rows != null && rows.size() > 1;
@@ -364,7 +416,7 @@ public with sharing class RosterValidationAction {
         }
 
         // ── Warning-only rules (Category 7) ────────────────────────────────
-        // W4: >20% of network being removed — evaluated by RosterStagingAction post-diff
+        // W4: >20% removal — evaluated by RosterStagingAction post-diff
         // W2, W3: specialty/tier change — evaluated by RosterStagingAction post-diff
 
         // ── Summary ────────────────────────────────────────────────────────
@@ -378,9 +430,26 @@ public with sharing class RosterValidationAction {
         out.success = !anyAbortErrors && out.rowErrors.isEmpty();
         out.hasBlockingErrors = !out.rowErrors.isEmpty();
 
-        // Build plain-English summary for agent narration
-        out.agentNarration = buildNarration(out);
+        // Build validatedRowsJson for StageRosterFile — valid rows only
+        Set<Integer> skippedRowNums = new Set<Integer>();
+        for (RowError re : out.rowErrors) {
+            if (re.rowNumber != null) skippedRowNums.add(re.rowNumber);
+        }
+        List<Map<String, String>> validRows = new List<Map<String, String>>();
+        for (Integer rowIdx = 1; rowIdx < rows.size(); rowIdx++) {
+            Integer rowNum = rowIdx + 1;
+            if (!skippedRowNums.contains(rowNum)) {
+                List<String> row = rows[rowIdx];
+                Map<String, String> rowMap = new Map<String, String>();
+                for (Integer ci = 0; ci < headers.size(); ci++) {
+                    rowMap.put(headers[ci].trim(), ci < row.size() ? row[ci] : '');
+                }
+                validRows.add(rowMap);
+            }
+        }
+        out.validatedRowsJson = JSON.serialize(validRows);
 
+        out.agentNarration = buildNarration(out);
         return out;
     }
 
@@ -544,9 +613,9 @@ public with sharing class RosterValidationAction {
     // ── Input / Output classes ────────────────────────────────────────────
 
     public class Input {
-        @InvocableVariable(label='File Name' required=true) public String fileName;
-        @InvocableVariable(label='File Body (raw CSV text)' required=true) public String fileBody;
-        @InvocableVariable(label='File Size (bytes)') public Long fileSizeBytes;
+        @InvocableVariable(label='CRF Record ID' required=true
+            description='Salesforce record ID of the Case Related File. The action reads the attached CSV file directly.')
+        public String crfId;
         @InvocableVariable(label='Known Column Names (from DPE mapping)') public List<String> knownColumns;
     }
 
@@ -563,6 +632,9 @@ public with sharing class RosterValidationAction {
         @InvocableVariable(label='Row Errors') public List<RowError> rowErrors;
         @InvocableVariable(label='Warnings') public List<RowError> warnings;
         @InvocableVariable(label='Agent Narration') public String agentNarration;
+        @InvocableVariable(label='Validated Rows JSON'
+            description='JSON array of valid row maps. Pass directly to StageRosterFile — do not modify.')
+        public String validatedRowsJson;
     }
 
     public class RuleResult {

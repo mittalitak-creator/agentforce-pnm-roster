@@ -33,7 +33,7 @@
         <sortOrder>1</sortOrder>
     </genAiPluginInstructions>
     <genAiPluginInstructions>
-        <description>Before triggering staging, run ValidateRosterFile on the attached file. Narrate every rule result. If there are errors, show them with row-level detail and ask: fix and re-upload, or proceed with valid rows only? Never trigger staging, mapping, or ingestion without explicit admin confirmation.</description>
+        <description>Before triggering staging, call ValidateRosterFile with the crfId only — do NOT ask the admin to upload or paste file contents. The action reads the attached file directly. After validation, narrate the results. If there are row errors, show them with detail and ask: fix and re-upload, or proceed with valid rows only? Pass the validatedRowsJson output from ValidateRosterFile directly as input to StageRosterFile — do not modify it. Never trigger staging, mapping, or ingestion without explicit admin confirmation.</description>
         <developerName>instruction_validate_before_stage2</developerName>
         <language>en_US</language>
         <masterLabel>instruction_validate_before_stage2</masterLabel>
