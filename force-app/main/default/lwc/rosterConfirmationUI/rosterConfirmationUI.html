@@ -1,0 +1,152 @@
+<template>
+    <div class="slds-p-around_medium">
+
+        <!-- Pre-Validation Summary pills -->
+        <div class="slds-m-bottom_medium">
+            <p class="slds-text-title_caps slds-m-bottom_x-small">Pre-Validation Summary</p>
+            <div class="slds-grid slds-wrap slds-gutters_x-small">
+                <div class="slds-col slds-shrink">
+                    <span class="slds-badge slds-theme_success">&#10003; {rulesPassedLabel}</span>
+                </div>
+                <template if:true={hasWarnings}>
+                    <div class="slds-col slds-shrink">
+                        <span class="slds-badge slds-theme_warning">&#9888; {warningsLabel}</span>
+                    </div>
+                </template>
+                <template if:true={hasErrors}>
+                    <div class="slds-col slds-shrink">
+                        <span class="slds-badge slds-theme_error">&#10007; {errorsLabel}</span>
+                    </div>
+                </template>
+                <template if:true={hasSkipped}>
+                    <div class="slds-col slds-shrink">
+                        <span class="slds-badge">{skippedLabel}</span>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Proposed Changes stat boxes -->
+        <div class="slds-m-bottom_medium">
+            <p class="slds-text-title_caps slds-m-bottom_x-small">Proposed Changes</p>
+            <div class="slds-grid slds-gutters_small slds-wrap">
+                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+                    <div class="slds-box slds-theme_success slds-text-align_center slds-p-around_small">
+                        <p class="slds-text-heading_large">{stagingSummary.newCount}</p>
+                        <p class="slds-text-body_small">New Providers</p>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+                    <div class="slds-box slds-text-align_center slds-p-around_small" style="background:#f0f9ff;border:1px solid #0176d3;border-radius:4px;">
+                        <p class="slds-text-heading_large" style="color:#0176d3;">{stagingSummary.updatedCount}</p>
+                        <p class="slds-text-body_small">Updated</p>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+                    <div class="slds-box slds-text-align_center slds-p-around_small">
+                        <p class="slds-text-heading_large slds-text-color_weak">{stagingSummary.noChangeCount}</p>
+                        <p class="slds-text-body_small">No Change</p>
+                    </div>
+                </div>
+                <template if:true={hasSkipped}>
+                    <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+                        <div class="slds-box slds-theme_warning slds-text-align_center slds-p-around_small">
+                            <p class="slds-text-heading_large">{validationSummary.skippedRowCount}</p>
+                            <p class="slds-text-body_small">Rows Skipped</p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- New Providers expandable section -->
+        <template if:true={hasNewProviders}>
+            <div class={newSectionClass}>
+                <h3 class="slds-section__title">
+                    <button
+                        aria-controls="sec-new"
+                        aria-expanded={newSectionOpen}
+                        title="Toggle New Providers section"
+                        class="slds-button slds-section__title-action"
+                        onclick={toggleNew}>
+                        <span class="slds-truncate">
+                            <lightning-badge label={newBadgeLabel} class="slds-m-right_x-small"></lightning-badge>
+                            New Providers to be added
+                        </span>
+                    </button>
+                </h3>
+                <div aria-hidden={newSectionHidden} class="slds-section__content" id="sec-new">
+                    <lightning-datatable
+                        key-field="npi"
+                        data={stagingSummary.newProviders}
+                        columns={newColumns}
+                        hide-checkbox-column>
+                    </lightning-datatable>
+                </div>
+            </div>
+        </template>
+
+        <!-- Updated Providers expandable section -->
+        <template if:true={hasUpdatedProviders}>
+            <div class={updatedSectionClass}>
+                <h3 class="slds-section__title">
+                    <button
+                        aria-controls="sec-updated"
+                        aria-expanded={updatedSectionOpen}
+                        title="Toggle Updated Providers section"
+                        class="slds-button slds-section__title-action"
+                        onclick={toggleUpdated}>
+                        <span class="slds-truncate">
+                            <lightning-badge label={updatedBadgeLabel} class="slds-m-right_x-small"></lightning-badge>
+                            Providers with field changes
+                        </span>
+                    </button>
+                </h3>
+                <div aria-hidden={updatedSectionHidden} class="slds-section__content" id="sec-updated">
+                    <lightning-datatable
+                        key-field="npi"
+                        data={stagingSummary.updatedProviders}
+                        columns={updatedColumns}
+                        hide-checkbox-column>
+                    </lightning-datatable>
+                </div>
+            </div>
+        </template>
+
+        <!-- Warnings -->
+        <template if:true={hasValidationWarnings}>
+            <div class="slds-notify slds-notify_alert slds-theme_warning slds-m-top_medium" role="alert">
+                <lightning-icon icon-name="utility:warning" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                <strong>{validationWarningText}</strong>
+                <span class="slds-m-left_x-small">These rows will be skipped during ingestion.</span>
+            </div>
+        </template>
+
+        <!-- Footer actions -->
+        <div class="slds-grid slds-grid_align-spread slds-m-top_large">
+            <div class="slds-col slds-shrink">
+                <lightning-button
+                    label="Download Change Report"
+                    icon-name="utility:download"
+                    onclick={handleDownload}>
+                </lightning-button>
+            </div>
+            <div class="slds-col slds-shrink">
+                <lightning-button
+                    label="Confirm &amp; Proceed to Mapping"
+                    variant="brand"
+                    onclick={handleConfirm}
+                    disabled={isConfirming}>
+                </lightning-button>
+            </div>
+        </div>
+
+        <template if:true={confirmMessage}>
+            <div class="slds-notify slds-notify_alert slds-theme_success slds-m-top_medium" role="status">
+                <lightning-icon icon-name="utility:check" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                {confirmMessage}
+            </div>
+        </template>
+
+    </div>
+</template>

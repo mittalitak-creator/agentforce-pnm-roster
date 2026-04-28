@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiFunction xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Triggers the CRF Run Ingestion action to start the DPE 3-level async ingestion chain. Only call after ManageRosterFieldMapping confirms mappingComplete = true. Creates the Roster_Audit_Log__c record. DPE runs asynchronously — agent receives completion via Roster_Ingest_Complete__e platform event.</description>
+    <developerName>TriggerRosterIngestion</developerName>
+    <label>Trigger Roster Ingestion</label>
+    <functionType>InvocableAction</functionType>
+    <invocableActionName>RosterIngestAction</invocableActionName>
+    <invocableActionType>apex</invocableActionType>
+</GenAiFunction>

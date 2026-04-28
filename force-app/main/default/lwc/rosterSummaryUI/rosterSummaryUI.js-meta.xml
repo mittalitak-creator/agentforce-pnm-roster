@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__RecordPage</target>
+        <target>lightning__AppPage</target>
+    </targets>
+    <description>UI-2: Post-Ingestion Summary. Displays plain-English change summary, outcome metrics, skipped row details, and audit record reference after DPE ingestion completes. Used inline in the Agentforce chat panel and on the Roster_Audit_Log__c record page.</description>
+</LightningComponentBundle>

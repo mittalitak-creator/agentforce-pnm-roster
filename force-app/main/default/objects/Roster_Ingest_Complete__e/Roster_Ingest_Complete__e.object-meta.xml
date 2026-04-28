@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Roster Ingest Complete</label>
+    <pluralLabel>Roster Ingest Completes</pluralLabel>
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>Fired by RosterAuditService when DPE ingestion job completes. Consumed by Agentforce to resume conversation and render UI-2.</description>
+    <eventType>HighVolume</eventType>
+    <publishBehavior>PublishAfterCommit</publishBehavior>
+</CustomObject>

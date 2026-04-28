@@ -1,0 +1,135 @@
+<template>
+    <div class="slds-var-p-around_medium">
+
+        <!-- Success / partial-failure banner -->
+        <template if:true={isSuccess}>
+            <div class="slds-notify slds-notify_alert slds-theme_success slds-var-m-bottom_medium" role="alert">
+                <lightning-icon icon-name="utility:check" size="small" class="slds-var-m-right_small"></lightning-icon>
+                <strong>Roster ingestion complete!</strong> Here&#39;s what changed in your Provider Network.
+            </div>
+        </template>
+        <template if:false={isSuccess}>
+            <div class="slds-notify slds-notify_alert slds-theme_warning slds-var-m-bottom_medium" role="alert">
+                <lightning-icon icon-name="utility:warning" size="small" class="slds-var-m-right_small"></lightning-icon>
+                <strong>Ingestion completed with some issues.</strong> Review the details below.
+            </div>
+        </template>
+
+        <!-- Plain-English "What Changed" summary -->
+        <div class="slds-box slds-theme_shade slds-var-m-bottom_medium">
+            <h3 class="slds-text-heading_small slds-var-m-bottom_small">What Changed</h3>
+            <p class="slds-text-body_regular">{auditLog.summaryParagraph}</p>
+        </div>
+
+        <!-- Outcome stat boxes -->
+        <div class="slds-grid slds-gutters_small slds-wrap slds-var-m-bottom_medium">
+            <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+                <div class="slds-box slds-theme_success slds-text-align_center slds-var-p-around_small">
+                    <p class="slds-text-heading_large">{auditLog.rowsAdded}</p>
+                    <p class="slds-text-body_small">Providers Added</p>
+                </div>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+                <div class="slds-box slds-text-align_center slds-var-p-around_small" style="background:#f0f9ff;border:1px solid #0176d3;border-radius:4px;">
+                    <p class="slds-text-heading_large" style="color:#0176d3;">{auditLog.rowsUpdated}</p>
+                    <p class="slds-text-body_small">Providers Updated</p>
+                </div>
+            </div>
+            <template if:true={hasSkipped}>
+                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+                    <div class="slds-box slds-theme_warning slds-text-align_center slds-var-p-around_small">
+                        <p class="slds-text-heading_large">{auditLog.rowsSkipped}</p>
+                        <p class="slds-text-body_small">Rows Skipped</p>
+                    </div>
+                </div>
+            </template>
+            <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+                <div class="slds-box slds-text-align_center slds-var-p-around_small">
+                    <p class="slds-text-heading_large slds-text-color_weak">{auditLog.rowsNoChange}</p>
+                    <p class="slds-text-body_small">No Change</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Skipped rows expandable detail -->
+        <template if:true={hasSkipped}>
+            <div class={skippedSectionClass}>
+                <h3 class="slds-section__title">
+                    <button
+                        aria-controls="sec-skipped"
+                        aria-expanded={skippedSectionOpen}
+                        title="Toggle Skipped Rows section"
+                        class="slds-button slds-section__title-action"
+                        onclick={toggleSkipped}>
+                        <span class="slds-truncate">
+                            <lightning-badge label={skippedBadgeLabel} class="slds-var-m-right_x-small"></lightning-badge>
+                            Rows not ingested — fix for next upload
+                        </span>
+                    </button>
+                </h3>
+                <div aria-hidden={skippedSectionHidden} class="slds-section__content" id="sec-skipped">
+                    <template if:true={hasSkippedDetail}>
+                        <lightning-datatable
+                            key-field="rowNumber"
+                            data={skippedRows}
+                            columns={skippedColumns}
+                            hide-checkbox-column>
+                        </lightning-datatable>
+                    </template>
+                    <template if:false={hasSkippedDetail}>
+                        <p class="slds-text-body_small slds-text-color_weak slds-var-p-around_small">
+                            Download the full audit report for row-level details.
+                        </p>
+                    </template>
+                </div>
+            </div>
+        </template>
+
+        <!-- Audit record block -->
+        <div class="slds-box slds-var-m-top_medium" style="background:#f0f9ff;border:1px solid #0176d3;border-radius:4px;">
+            <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-spread">
+                <div class="slds-col">
+                    <div class="slds-grid slds-grid_vertical-align-center">
+                        <lightning-icon icon-name="utility:record" size="small" class="slds-var-m-right_small"></lightning-icon>
+                        <div>
+                            <p class="slds-text-body_regular slds-text-color_default">
+                                <strong>Audit Record: {auditLog.name}</strong>
+                            </p>
+                            <p class="slds-text-body_small slds-text-color_weak">
+                                CRF: {auditLog.crfId} &bull;
+                                Uploaded by: {auditLog.uploadedBy} &bull;
+                                Duration: {durationLabel}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-col slds-shrink">
+                    <lightning-button
+                        label="View Record"
+                        variant="neutral"
+                        onclick={handleViewAuditRecord}>
+                    </lightning-button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer actions -->
+        <div class="slds-grid slds-grid_align-spread slds-var-m-top_large">
+            <div class="slds-col slds-shrink">
+                <lightning-button
+                    label="Download Full Audit Report"
+                    icon-name="utility:download"
+                    onclick={handleDownloadAudit}>
+                </lightning-button>
+            </div>
+            <div class="slds-col slds-shrink">
+                <lightning-button
+                    label="Upload Another Roster"
+                    variant="brand"
+                    onclick={handleUploadAnother}>
+                </lightning-button>
+            </div>
+        </div>
+
+    </div>
+</template>

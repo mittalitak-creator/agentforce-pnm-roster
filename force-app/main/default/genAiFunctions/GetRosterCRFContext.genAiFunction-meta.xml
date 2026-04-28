@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiFunction xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Reads the Case Related File record from page context and returns its current workflow stage, status, file name, and related IDs. Call this first on every agent session to determine which workflow step to resume from.</description>
+    <developerName>GetRosterCRFContext</developerName>
+    <label>Get Roster CRF Context</label>
+    <functionType>InvocableAction</functionType>
+    <invocableActionName>RosterContextAction</invocableActionName>
+    <invocableActionType>apex</invocableActionType>
+</GenAiFunction>

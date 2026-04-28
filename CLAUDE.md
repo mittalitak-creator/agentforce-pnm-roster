@@ -2,12 +2,14 @@
 
 ## Salesforce Org
 
-- **Default org alias:** `sdb27_test1`
-- **Username:** `epic.655de912eb5b@orgfarm.out`
-- **Instance URL:** `https://orgfarm-a21ec90cd7.test1.my.pc-rnd.salesforce.com`
-- **Org ID:** `00DLT000007G0kn2AC`
+- **Default org alias:** `storm_org`
+- **Username:** `storm.155501697ec74d@salesforce.com`
+- **Instance URL:** `https://storm-155501697ec74d.my.salesforce.com`
+- **Org ID:** `00DIf000000IoPZMA0`
 
-Use `--target-org sdb27_test1` on all `sf` commands unless the user specifies otherwise.
+Use `--target-org storm_org` on all `sf` commands unless the user specifies otherwise.
+
+> **Why storm_org:** This org has Salesforce Health Cloud PNM installed — CaseRelatedFile object, RosterEntitiesCreationTrigger, DPE feature, and real provider data. Required for Roster Ingestion agent development.
 
 ## Other Connected Orgs
 
