@@ -32,9 +32,9 @@ public with sharing class RosterContextAction {
             ? 'WHERE Id = :crfId'
             : 'WHERE Name = :crfId';
         List<SObject> records = Database.query(
-            'SELECT Id, Name, ProcessStage__c, ProcessStatus__c, ' +
-            'SourceDatasetName__c, TargetDatasetName__c, ' +
-            'ContentDocumentId__c, CaseId__c, ProcessDefinitionReferenceId__c ' +
+            'SELECT Id, Name, ProcessStage, ProcessStatus, ' +
+            'SourceDatasetName, TargetDatasetName, ' +
+            'ContentDocumentId, CaseId, ProcessDefinitionReferenceId ' +
             'FROM CaseRelatedFile ' +
             + whereClause +
             ' WITH USER_MODE ' +
@@ -52,13 +52,13 @@ public with sharing class RosterContextAction {
         out.success = true;
         out.crfId = (String) crf.get('Id');
         out.crfName = (String) crf.get('Name');
-        out.processStage = (String) crf.get('ProcessStage__c');
-        out.processStatus = (String) crf.get('ProcessStatus__c');
-        out.sourceDatasetName = (String) crf.get('SourceDatasetName__c');
-        out.targetDatasetName = (String) crf.get('TargetDatasetName__c');
-        out.contentDocumentId = (String) crf.get('ContentDocumentId__c');
-        out.caseId = (String) crf.get('CaseId__c');
-        out.processDefinitionReferenceId = (String) crf.get('ProcessDefinitionReferenceId__c');
+        out.processStage = (String) crf.get('ProcessStage');
+        out.processStatus = (String) crf.get('ProcessStatus');
+        out.sourceDatasetName = (String) crf.get('SourceDatasetName');
+        out.targetDatasetName = (String) crf.get('TargetDatasetName');
+        out.contentDocumentId = (String) crf.get('ContentDocumentId');
+        out.caseId = (String) crf.get('CaseId');
+        out.processDefinitionReferenceId = (String) crf.get('ProcessDefinitionReferenceId');
 
         // Derive a plain-English resume instruction for the agent
         out.agentResumeInstruction = buildResumeInstruction(out);

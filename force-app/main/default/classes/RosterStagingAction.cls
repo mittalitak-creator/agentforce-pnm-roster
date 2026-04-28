@@ -115,7 +115,7 @@ public with sharing class RosterStagingAction {
         // ── Trigger CRF Stage File ───────────────────────────────────────
         try {
             List<SObject> crfList = Database.query(
-                'SELECT Id, ProcessStage__c, ProcessStatus__c, TargetDatasetName__c ' +
+                'SELECT Id, ProcessStage, ProcessStatus, TargetDatasetName ' +
                 'FROM CaseRelatedFile WHERE Id = :inp.crfId WITH USER_MODE LIMIT 1'
             );
             if (!crfList.isEmpty()) {
@@ -123,8 +123,8 @@ public with sharing class RosterStagingAction {
                 // In production this is called via healthcloudext APIs; here we set the stage
                 // to reflect staging was requested. The actual DLO creation is platform-managed.
                 SObject crf = crfList[0];
-                crf.put('ProcessStage__c', 'Staging');
-                crf.put('ProcessStatus__c', 'InProgress');
+                crf.put('ProcessStage', 'Staging');
+                crf.put('ProcessStatus', 'InProgress');
                 update crf;
                 out.targetDatasetName = 'CanonicalData_' + inp.crfId;
             }

@@ -62,7 +62,7 @@ public with sharing class RosterValidationAction {
                 ? 'WHERE Id = :crfRef'
                 : 'WHERE Name = :crfRef';
             List<SObject> crfList = Database.query(
-                'SELECT ContentDocumentId__c FROM CaseRelatedFile ' + crfWhere + ' WITH USER_MODE LIMIT 1'
+                'SELECT ContentDocumentId FROM CaseRelatedFile ' + crfWhere + ' WITH USER_MODE LIMIT 1'
             );
             if (crfList.isEmpty()) {
                 out.success = false;
@@ -70,7 +70,7 @@ public with sharing class RosterValidationAction {
                 out.agentNarration = 'Pre-validation aborted: ' + out.abortReason;
                 return out;
             }
-            String contentDocId = (String) crfList[0].get('ContentDocumentId__c');
+            String contentDocId = (String) crfList[0].get('ContentDocumentId');
             if (String.isBlank(contentDocId)) {
                 out.success = false;
                 out.abortReason = 'No file is attached to this CRF record. Please upload a CSV roster file first.';

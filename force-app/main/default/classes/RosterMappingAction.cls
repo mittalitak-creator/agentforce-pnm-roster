@@ -40,13 +40,13 @@ public with sharing class RosterMappingAction {
         // Update CRF to reflect mapping has been triggered
         try {
             List<SObject> crfList = Database.query(
-                'SELECT Id, ProcessStage__c, ProcessStatus__c ' +
+                'SELECT Id, ProcessStage, ProcessStatus ' +
                 'FROM CaseRelatedFile WHERE Id = :inp.crfId WITH USER_MODE LIMIT 1'
             );
             if (!crfList.isEmpty()) {
                 SObject crf = crfList[0];
-                crf.put('ProcessStage__c', 'Mapping');
-                crf.put('ProcessStatus__c', 'InProgress');
+                crf.put('ProcessStage', 'Mapping');
+                crf.put('ProcessStatus', 'InProgress');
                 update crf;
             }
         } catch (Exception e) {
@@ -78,7 +78,7 @@ public with sharing class RosterMappingAction {
 
         try {
             List<SObject> crfList = Database.query(
-                'SELECT Id, ProcessStage__c, ProcessStatus__c ' +
+                'SELECT Id, ProcessStage, ProcessStatus ' +
                 'FROM CaseRelatedFile WHERE Id = :crfId WITH USER_MODE LIMIT 1'
             );
             if (crfList.isEmpty()) {
@@ -88,8 +88,8 @@ public with sharing class RosterMappingAction {
             }
 
             SObject crf = crfList[0];
-            String stage = (String) crf.get('ProcessStage__c');
-            String status = (String) crf.get('ProcessStatus__c');
+            String stage = (String) crf.get('ProcessStage');
+            String status = (String) crf.get('ProcessStatus');
 
             out.success = true;
             out.currentStage = stage;

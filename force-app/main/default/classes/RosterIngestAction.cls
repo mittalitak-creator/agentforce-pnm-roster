@@ -31,7 +31,7 @@ public with sharing class RosterIngestAction {
         // Confirm mapping is complete before triggering ingestion
         try {
             List<SObject> crfList = Database.query(
-                'SELECT Id, ProcessStage__c, ProcessStatus__c, TargetDatasetName__c ' +
+                'SELECT Id, ProcessStage, ProcessStatus, TargetDatasetName ' +
                 'FROM CaseRelatedFile WHERE Id = :inp.crfId WITH USER_MODE LIMIT 1'
             );
 
@@ -42,8 +42,8 @@ public with sharing class RosterIngestAction {
             }
 
             SObject crf = crfList[0];
-            String stage = (String) crf.get('ProcessStage__c');
-            String status = (String) crf.get('ProcessStatus__c');
+            String stage = (String) crf.get('ProcessStage');
+            String status = (String) crf.get('ProcessStatus');
 
             if (stage != 'Mapping' || status != 'Complete') {
                 out.success = false;
@@ -52,11 +52,11 @@ public with sharing class RosterIngestAction {
             }
 
             // Update CRF to Processing/InProgress to reflect ingestion started
-            crf.put('ProcessStage__c', 'Processing');
-            crf.put('ProcessStatus__c', 'InProgress');
+            crf.put('ProcessStage', 'Processing');
+            crf.put('ProcessStatus', 'InProgress');
             update crf;
 
-            out.targetDatasetName = (String) crf.get('TargetDatasetName__c');
+            out.targetDatasetName = (String) crf.get('TargetDatasetName');
 
         } catch (Exception e) {
             out.success = false;
